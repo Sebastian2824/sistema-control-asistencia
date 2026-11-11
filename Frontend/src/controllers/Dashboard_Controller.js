@@ -1602,7 +1602,7 @@ class DashboardController {
     // NAVEGACIÓN
     // ==========================================
     redirigirALogin() {
-        window.location.replace(this.config?.ROUTES?.LOGIN || '/index.html');
+        window.location.replace(this.config?.ROUTES?.LOGIN || 'index.html');
     }
 
     redirigirAlMenu() {

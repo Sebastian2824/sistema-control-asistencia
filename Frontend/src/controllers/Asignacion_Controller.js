@@ -2033,7 +2033,7 @@ class AsignacionController {
     // ==========================================
     irAlMenu() { window.location.href = this.config?.ROUTES?.MENU || 'Menu.html'; }
     irAlPerfil() { window.location.href = this.config?.ROUTES?.PERFIL || 'Mi-Perfil.html'; }
-    redirigirALogin() { window.location.replace(this.config?.ROUTES?.LOGIN || '/index.html'); }
+    redirigirALogin() { window.location.replace(this.config?.ROUTES?.LOGIN || 'index.html'); }
 
     cerrarSesion() {
         this.mostrarMensaje('Sesión cerrada correctamente', 'success');

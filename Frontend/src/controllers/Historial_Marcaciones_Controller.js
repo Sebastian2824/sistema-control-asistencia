@@ -2219,7 +2219,7 @@ class HistorialMarcacionesController {
     // ==========================================
     // NAVEGACIÓN
     // ==========================================
-    redirigirALogin() { window.location.replace(this.config?.ROUTES?.LOGIN || '/index.html'); }
+    redirigirALogin() { window.location.replace(this.config?.ROUTES?.LOGIN || 'index.html'); }
     redirigirAlMenu() { window.location.href = this.config?.ROUTES?.MENU || 'Menu.html'; }
     redirigirAlPerfil() { window.location.href = this.config?.ROUTES?.PERFIL || 'Mi-Perfil.html'; }
 

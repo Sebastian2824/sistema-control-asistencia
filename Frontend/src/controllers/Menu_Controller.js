@@ -88,7 +88,7 @@ class MenuController {
     // REDIRECCIONES
     // ============================================
     redirigirALogin() {
-        const loginRoute = this.config?.ROUTES?.LOGIN || '/index.html';
+        const loginRoute = this.config?.ROUTES?.LOGIN || 'index.html';
         window.location.replace(loginRoute);
     }
 

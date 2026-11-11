@@ -2092,7 +2092,7 @@ class RegistroAsistenciaController {
     // NAVEGACIÓN
     // ============================================
     redirigirALogin() {
-        const ruta = this.config?.ROUTES?.LOGIN || '/index.html';
+        const ruta = this.config?.ROUTES?.LOGIN || 'index.html';
         window.location.replace(ruta);
     }
 

@@ -194,7 +194,7 @@ class AuthService {
         sessionStorage.removeItem('rolActual');
         sessionStorage.removeItem('authSource');
 
-        const loginRoute = this.config?.ROUTES?.LOGIN || '/index.html';
+        const loginRoute = this.config?.ROUTES?.LOGIN || 'index.html';
         window.location.href = loginRoute;
     }
 

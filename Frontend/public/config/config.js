@@ -2,20 +2,49 @@
 // CONFIGURACIÓN GLOBAL DEL SISTEMA - CONTROL DE ASISTENCIA
 // ==============================================
 
+ const _getBaseURL = () => {
+        // Si estamos en GitHub Pages con subcarpeta, la URL será:
+        // https://usuario.github.io/repo/
+        // Si estamos en local, será:
+        // http://localhost:5500/  o  file:///...
+
+        const path = window.location.pathname;
+
+        // Encontrar la subcarpeta del proyecto (para GitHub Pages)
+        // Ej: /sistema-control-asistencia/Frontend/src/views/Menu.html
+        // Queremos: /sistema-control-asistencia/
+        const parts = path.split('/').filter(Boolean);
+
+        // Si el primer segmento es el nombre del repo (sistema-control-asistencia),
+        // lo usamos como base. Si no, base es raíz.
+        if (parts.length > 0 && !parts[0].includes('.')) {
+            // Es probable que sea el nombre del repo en GitHub Pages
+            // Pero cuidado: en local con Live Server, parts[0] podría ser "Frontend"
+            const esGitHubPages = window.location.hostname.includes('github.io');
+            if (esGitHubPages) {
+                return `/${parts[0]}/`;
+            }
+        }
+
+        return '/';
+    };
+
 const CONFIG = {
-   
+
     BACKEND_URL: (() => {
-        const isLocalhost = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1' ||
-                            window.location.hostname.startsWith('192.168.');
-        return isLocalhost 
-            ? 'http://localhost:3001' 
+        const isLocalhost = window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1' ||
+            window.location.hostname.startsWith('192.168.');
+        return isLocalhost
+            ? 'http://localhost:3001'
             : 'https://bancked-control-asistencia-production.up.railway.app';
     })(),
-    
+
+    BASE_URL: _getBaseURL(),
+
     // Rutas del sistema
     ROUTES: {
-        LOGIN: '/index.html',
+        LOGIN: 'index.html',
         MENULOGIN: 'Frontend/src/views/Menu.html',
         MENU: 'Menu.html',
         REGISTRO_ASISTENCIA: 'Registro-Asistencia.html',
@@ -32,20 +61,20 @@ const CONFIG = {
     SINCRONIZACION: {
         // Tiempo de espera después del login para iniciar sincronización (ms)
         DELAY_INICIAL: 500,
-        
+
         // Tiempo entre sincronizaciones en background (ms)
         INTERVALO: 5 * 60 * 1000, // 5 minutos
-        
+
         // TTL del cache de sincronización (ms)
         CACHE_TTL: 2 * 60 * 1000, // 2 minutos
-        
+
         // Máximo de reintentos por pendiente
         MAX_REINTENTOS: 3,
-        
+
         // Interfaces a sincronizar
         INTERFACES: ['GestionUsuarios', 'Perfil']
     },
-    
+
     // Tiempos en milisegundos
     TIMEOUTS: {
         MESSAGE_DURATION: 4000,
@@ -53,14 +82,14 @@ const CONFIG = {
         REFRESH_INTERVAL: 30000,
         SESSION_TIMEOUT: 28800000
     },
-    
+
     // Formatos de fecha y hora
     FORMATOS: {
         HORA: 'HH:mm',
         FECHA: 'yyyy-MM-dd',
         FECHA_HORA: 'yyyy-MM-dd HH:mm:ss'
     },
-    
+
     // Endpoints de la API
     API_ACTIONS: {
         GET_ALL: 'getAll',
@@ -71,7 +100,7 @@ const CONFIG = {
         LOGIN: 'login',
         REGISTRAR_MARCACION: 'registrarMarcacion',
         REPORTE_ASISTENCIA: 'reporteAsistencia',
-        
+
         // NUEVAS acciones SQL Server
         SQL_TEST_CONNECTION: 'sqlTestConnection',
         SQL_GET_TABLE: 'sqlGetTable',
