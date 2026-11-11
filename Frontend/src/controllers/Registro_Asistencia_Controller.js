@@ -328,6 +328,8 @@ class RegistroAsistenciaController {
             this.mostrarErrorCarga(['Error inesperado al cargar los datos']);
             this.bloquearTodosLosBotones('Error de carga');
         }
+
+        this.auth.prevenirNavegacionAtras();
     }
 
     // ============================================

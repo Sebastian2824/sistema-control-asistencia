@@ -67,6 +67,8 @@ class MenuController {
 
         // 5) Prevenir caché (bfcache)
         this.prevenirCache();
+        this.auth.prevenirNavegacionAtras();
+
 
         this.inicializado = true;
         console.log('✅ MenuController inicializado');

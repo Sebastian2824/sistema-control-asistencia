@@ -82,6 +82,7 @@ class HorarioController {
         await this.cargarEstados();
         await this.cargarUsuarios();
         await this.cargarHorarios();
+        this.auth.prevenirNavegacionAtras();
 
         console.log('✅ HorarioController inicializado');
     }

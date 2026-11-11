@@ -164,6 +164,8 @@ class HistorialMarcacionesController {
         // 4) Cargar datos iniciales
         await this.cargarDatosIniciales();
 
+        this.auth.prevenirNavegacionAtras();
+
         console.log('✅ HistorialMarcacionesController inicializado');
     }
 

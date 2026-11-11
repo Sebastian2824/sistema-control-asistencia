@@ -156,6 +156,8 @@ class MarcacionesController {
 
         // 5) Cargar datos iniciales
         await this.cargarDatosIniciales();
+        this.auth.prevenirNavegacionAtras();
+
 
         console.log('✅ GestionMarcacionesController inicializado');
     }

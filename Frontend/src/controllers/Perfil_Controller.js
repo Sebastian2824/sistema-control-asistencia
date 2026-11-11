@@ -100,6 +100,8 @@ class PerfilController {
 
         // 5) Cargar perfil completo del backend
         await this.cargarPerfil();
+        this.auth.prevenirNavegacionAtras();
+
 
         console.log('✅ PerfilController inicializado');
     }

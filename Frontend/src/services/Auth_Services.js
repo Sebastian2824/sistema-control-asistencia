@@ -198,6 +198,18 @@ class AuthService {
         window.location.href = loginRoute;
     }
 
+    prevenirNavegacionAtras() {
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            // Página restaurada desde bfcache
+            if (!this.verificarSesion()) {
+                const loginUrl = this.config?.ROUTES?.LOGIN || (window.location.origin + '/index.html');
+                window.location.replace(loginUrl);
+            }
+        }
+    });
+}
+
     verificarSesion() {
         let userData = sessionStorage.getItem('usuarioActual');
         let loginTime = sessionStorage.getItem('loginTime');

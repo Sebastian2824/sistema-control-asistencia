@@ -16,8 +16,9 @@
 
 class DashboardController {
 
-    constructor(config) {
+    constructor(config, authService) {
         this.config = config || {};
+        this.auth = authService;
         this.usuarioActual = null;
 
         // Service (inyectado en el bootstrap)
@@ -157,6 +158,9 @@ class DashboardController {
 
         // 10. Ocultar modal
         this.ocultarModalCarga();
+
+        this.auth.prevenirNavegacionAtras();
+
         console.log('✅ Dashboard inicializado correctamente');
     }
 

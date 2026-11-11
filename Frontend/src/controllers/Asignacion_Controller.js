@@ -93,6 +93,8 @@ class AsignacionController {
 
         await this.cargarDatosIniciales();
 
+        this.auth.prevenirNavegacionAtras();
+
         console.log('✅ AsignacionController inicializado');
     }
 

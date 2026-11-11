@@ -116,6 +116,7 @@ class GestionUsuariosController {
 
         await this.cargarUsuarios();
         this.ocultarCarga();
+        this.auth.prevenirNavegacionAtras();
     }
 
     actualizarHeader() {
