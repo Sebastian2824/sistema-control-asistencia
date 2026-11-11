@@ -35,7 +35,7 @@ class EnvironmentDetector {
         if (this.isDevelopment()) {
             return 'http://localhost:3001';
         }
-        return 'https://api-controlhorario.grupoperuroutes.com';
+        return 'https://bancked-control-asistencia-production.up.railway.app';
     }
     
     /**
