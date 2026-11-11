@@ -12,7 +12,7 @@ class ApiClient {
             ? EnvironmentDetector.getBackendURL()
             : (this.config.BACKEND_URL || 'http://localhost:3001');
         this.BASE_URL = this.BASE_URL.replace(/\/+$/, '');
-        this.DEFAULT_TIMEOUT = 15000;
+        this.DEFAULT_TIMEOUT = 50000;
 
         console.log('🔧 ApiClient - Backend URL:', this.BASE_URL);
     }
