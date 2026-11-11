@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Control de Asistencias - Login Corporativo</title>
+    <link rel="icon" type="image/png" href="Frontend/public/assets/icono.png">
+
+    <!-- Prevenir caché -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="Frontend/src/css/Login.css">
+</head>
+<body>
+    <!-- Círculos decorativos -->
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+
+    <div class="login-container">
+        <div class="login-card fade-in">
+
+            <!-- HEADER -->
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h2>Control de <span>Asistencias</span></h2>
+                <p>Ingrese sus credenciales para acceder al sistema</p>
+                <div class="brand-text"><strong>PERU ROUTES</strong> · SISTEMA PRIVADO</div>
+            </div>
+
+            <!-- ✅ FORM con onsubmit="return false;" y novalidate -->
+            <form id="loginForm" class="login-form" autocomplete="off"
+                  onsubmit="return false;" novalidate>
+                <!-- Usuario -->
+                <div class="input-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Usuario o Correo Electrónico
+                    </label>
+                    <div class="input-wrapper">
+                        <!-- ✅ SIN name, autocomplete único -->
+                        <input type="text" id="username"
+                            placeholder="ejemplo@peruroutes.com o usuario123"
+                            autocomplete="off" />
+                        <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                    </div>
+                    <span class="error-message" id="usernameError">
+                        <i class="fas fa-exclamation-circle"></i> Por favor ingrese su usuario o correo electrónico
+                    </span>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="input-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Contraseña
+                    </label>
+                    <div class="input-wrapper">
+                        <!-- ✅ SIN name -->
+                        <input type="password" id="password" placeholder="Ingrese su contraseña"
+                            autocomplete="off" />
+                        <button type="button" class="toggle-password" id="togglePassword"
+                            aria-label="Mostrar contraseña">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="passwordError">
+                        <i class="fas fa-exclamation-circle"></i> Por favor ingrese su contraseña
+                    </span>
+                </div>
+
+                <div class="remember-wrapper">
+                    <label class="remember-label" for="rememberMe">
+                        <input type="checkbox" id="rememberMe" />
+                        <span class="checkmark"></span>
+                        <span class="remember-text">
+                            <i class="fas fa-bookmark"></i> Recordar mis credenciales
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Botón Login -->
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span id="btnText">Iniciar Sesión</span>
+                </button>
+
+                <!-- Footer del formulario -->
+                <div class="login-footer">
+                    <a href="#" id="forgotPassword">¿Olvidó su contraseña?</a>
+                </div>
+
+                <!-- Mensaje dinámico -->
+                <div id="loginMessage" class="message-box"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================
+         SCRIPTS — orden correcto + defer
+         ============================================ -->
+
+    <!-- 1) Utilidades (no dependen de nadie) -->
+    <script defer src="Frontend/public/config/config.js"></script>
+    <script defer src="Frontend/public/utils/Environment_Detector.js"></script>
+    <script defer src="Frontend/public/utils/Api_Client.js"></script>
+    <script defer src="Frontend/public/utils/Password_Encryption.js"></script>
+    <script defer src="Frontend/public/utils/Remember_Me.js"></script>
+    <script defer src="Frontend/public/utils/Session_Guard.js"></script>
+
+    <!-- 2) Services (dependen de EnvironmentDetector) -->
+    <script defer src="Frontend/src/services/Auth_Services.js"></script>
+    <script defer src="Frontend/src/services/Password_Reset_Services.js"></script>
+
+    <!-- 3) Controllers (dependen de Services) -->
+    <script defer src="Frontend/src/controllers/Login_Controller.js"></script>
+    <script defer src="Frontend/src/controllers/Recuperar_Password_Controller.js"></script>
+
+    <!-- 4) Bootstrap (depende de todo lo anterior) -->
+    <script defer src="Frontend/public/bootstrap/Login_Bootstrap.js"></script>
+
+    <!-- 5) Bloqueo (opcional) -->
+    <script defer src="Frontend/public/utils/Bloqueo.js"></script>
+</body>
+
+</html>

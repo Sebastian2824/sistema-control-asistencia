@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencias - Asignación de Horarios</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- FullCalendar CSS (lo provee el global.min.js) -->
+    <link rel="stylesheet" href="../css/Asignaciones.css">
+</head>
+
+<body>
+    <!-- HEADER CORPORATIVO -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon"><i class="fas fa-user-clock"></i></div>
+            <div>
+                <h1>Control de Asistencias</h1>
+                <div class="subtitle"><i class="fas fa-calendar-alt"></i> Asignación de Horarios</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Administrador</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Administrador</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn"><i class="fas fa-home"></i> Menú Principal</button>
+                <button class="dropdown-item" id="perfilBtn"><i class="fas fa-user-cog"></i> Mi Perfil</button>
+                <button class="dropdown-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar
+                    Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-container">
+        <div class="actions-bar">
+            <h2><i class="fas fa-user-clock"></i> Asignación de <span>Horarios</span></h2>
+            <div class="actions-group">
+                <button class="btn btn-calendario" id="btnCalendario">
+                    <i class="fas fa-calendar-day"></i> Calendario
+                </button>
+                <button class="btn btn-exportar" id="btnExportarExcel">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
+                <button class="btn btn-asignacion-grupal" id="btnAsignacionGrupal">
+                    <i class="fas fa-users"></i> Grupal — Fecha
+                </button>
+                <button class="btn btn-masivo" id="btnRegistroMasivo">
+                    <i class="fas fa-calendar-alt"></i> Grupal — Rango
+                </button>
+                <button class="btn btn-ver-no-laborables" id="btnVerNoLaborables">
+                    <i class="fas fa-calendar-times"></i> Ver No Laborables
+                </button>
+                <button class="btn btn-restore" id="btnRestaurarAsignaciones">
+                    <i class="fas fa-trash-restore"></i> Restaurar
+                </button>
+                <button class="btn btn-no-laborable" id="btnNoLaborable">
+                    <i class="fas fa-calendar-times"></i> No Laborable — Fecha
+                </button>
+                <button class="btn btn-no-laborable-masivo" id="btnNoLaborableMasivo">
+                    <i class="fas fa-calendar-times"></i> No Laborable — Rango
+                </button>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filtros-container">
+            <div class="filtro-group" style="flex: 1.5;">
+                <label><i class="fas fa-calendar-day"></i> Fecha Específica</label>
+                <input type="date" id="filtroFechaEspecifica">
+                <small><i class="fas fa-info-circle"></i> Prioritario sobre rango</small>
+            </div>
+            <div class="filtro-group">
+                <label><i class="fas fa-user"></i> Usuario</label>
+                <select id="filtroUsuario">
+                    <option value="">-- Todos --</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label><i class="fas fa-clock"></i>Horarios</label>
+                <select id="filtroHorario">
+                    <option value="">-- Todos --</option>
+                </select>
+            </div>
+            <div class="filtro-group">
+                <label><i class="fas fa-calendar-plus"></i> Fecha Desde</label>
+                <input type="date" id="filtroFechaDesde">
+            </div>
+            <div class="filtro-group">
+                <label><i class="fas fa-calendar-minus"></i> Fecha Hasta</label>
+                <input type="date" id="filtroFechaHasta">
+            </div>
+            <div class="filtro-group">
+                <button class="btn-limpiar" id="btnLimpiarFiltros">
+                    <i class="fas fa-broom"></i> Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLA DE ASIGNACIONES -->
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="tablaAsignaciones">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th class="col-id-usuario"><i class="fas fa-id-badge"></i> ID Usuario</th>
+                            <th><i class="fas fa-user"></i> Usuario</th>
+                            <th class="col-id-horario"><i class="fas fa-hashtag"></i> ID Horario</th>
+                            <th><i class="fas fa-clock"></i> Horario</th>
+                            <th><i class="fas fa-laptop-house"></i> Tipo</th>
+                            <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                            <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                            <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                            <th><i class="fas fa-utensils"></i> Ing. Almuerzo</th>
+                            <th><i class="fas fa-utensils"></i> Sal. Almuerzo</th>
+                            <th class="col-id-estado"><i class="fas fa-hashtag"></i> ID Estado</th>
+                            <th><i class="fas fa-toggle-on"></i> Estado</th>
+                            <th class="col-id-usuario-creacion"><i class="fas fa-id-badge"></i> ID Creación</th>
+                            <th><i class="fas fa-user-plus"></i> Usuario Creación</th>
+                            <th><i class="fas fa-calendar-plus"></i> Fecha Creación</th>
+                            <th class="col-id-usuario-modificacion"><i class="fas fa-id-badge"></i> ID Modif.</th>
+                            <th><i class="fas fa-user-edit"></i> Usuario Modif.</th>
+                            <th><i class="fas fa-calendar-check"></i> Fecha Modif.</th>
+                            <th style="width: 160px;"><i class="fas fa-cogs"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAsignacionesBody">
+                        <tr>
+                            <td colspan="20" class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando
+                                asignaciones...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: AGREGAR/EDITAR ASIGNACIÓN -->
+    <div id="modalAsignacion" class="modal">
+        <div class="modal-content" style="max-width: 640px;">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-plus-circle"></i> Asignar Horario</h3>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="asignacionForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+                    <input type="hidden" id="asignacionId" value="">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="idUsuario"><i class="fas fa-user"></i> Usuario</label>
+                            <select id="idUsuario" required>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="idHorario"><i class="fas fa-clock"></i> Horario</label>
+                            <select id="idHorario" required>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha"><i class="fas fa-calendar-day"></i> Fecha</label>
+                        <input type="date" id="fecha" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ingEsperado"><i class="fas fa-sign-in-alt"></i> Ingreso Esperado</label>
+                            <input type="time" id="ingEsperado">
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Bloqueado si el horario lo define
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="salEsperada"><i class="fas fa-sign-out-alt"></i> Salida Esperada</label>
+                            <input type="time" id="salEsperada">
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Bloqueado si el horario lo define
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ingAlmuerzo"><i class="fas fa-utensils"></i> Ingreso Almuerzo</label>
+                            <input type="time" id="ingAlmuerzo" disabled>
+                            <div class="help-text"><i class="fas fa-lock"></i> Solo lectura (definido en el horario)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="salAlmuerzo"><i class="fas fa-utensils"></i> Salida Almuerzo</label>
+                            <input type="time" id="salAlmuerzo" disabled>
+                            <div class="help-text"><i class="fas fa-lock"></i> Solo lectura (definido en el horario)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="notaAlmuerzo" class="nota-almuerzo" style="display:none;">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Los campos de almuerzo son de <strong>solo lectura</strong>. Se configuran en el módulo de
+                            Gestión de Horarios.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idEstado"><i class="fas fa-toggle-on"></i> Estado</label>
+                        <select id="idEstado" required>
+                            <option value="">-- Seleccione --</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnCancelar">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardar">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CALENDARIO -->
+    <div id="modalCalendario" class="modal">
+        <div class="modal-content calendario">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-alt"></i> Calendario de Asignaciones</h3>
+                <button class="close-modal" id="closeCalendarioBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="calendario"></div>
+                <div class="button-group" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" id="btnCerrarCalendario">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DETALLE POR FECHA -->
+    <div id="modalDetalleFecha" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="detalleFechaTitle"><i class="fas fa-list"></i> Asignaciones del día</h3>
+                <button class="close-modal" id="closeDetalleBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-scroll-wrapper" style="max-height: 500px;">
+                    <table style="min-width: 700px;">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-user"></i> Usuario</th>
+                                <th><i class="fas fa-clock"></i> Horario</th>
+                                <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                                <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                                <th><i class="fas fa-utensils"></i> Ing. Almuerzo</th>
+                                <th><i class="fas fa-utensils"></i> Sal. Almuerzo</th>
+                                <th><i class="fas fa-toggle-on"></i> Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalleFechaBody">
+                            <tr>
+                                <td colspan="7" class="loading">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-group" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" id="btnCerrarDetalle">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR ELIMINACIÓN -->
+    <div id="modalConfirmar" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h3>
+                <button class="close-modal" id="closeConfirmModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmarMensajeAsignacion" style="margin-bottom: 15px; color:#1a1a2e;"></p>
+
+                <div class="alerta-warning">
+                    <p><strong><i class="fas fa-exclamation-circle"></i> ADVERTENCIA</strong></p>
+                    <p>Se eliminarán también:</p>
+                    <ul>
+                        <li><strong>Marcaciones</strong> relacionadas</li>
+                        <li><strong>Evidencias</strong></li>
+                        <li><strong>Observaciones</strong></li>
+                        <li><strong>Justificaciones</strong></li>
+                    </ul>
+                    <p style="color:#dc3545; margin-top:10px;"><strong><i class="fas fa-undo"></i> Podrá restaurar desde
+                            "Restaurar".</strong></p>
+                </div>
+
+                <div style="text-align:center; margin:20px 0;">
+                    <p style="font-size:14px; color:#6c757d;">Eliminación automática en:</p>
+                    <div id="countdownTimer" style="font-size:24px; font-weight:bold; color:#dc3545; margin-top:10px;">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="btnCancelarEliminar"><i class="fas fa-times"></i>
+                        Cancelar</button>
+                    <button class="btn btn-danger" id="btnConfirmarEliminar"><i class="fas fa-trash"></i> Eliminar
+                        ahora</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: RESTAURAR ASIGNACIONES -->
+    <div id="modalRestaurarAsignaciones" class="modal">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash-restore"></i> Restaurar Asignaciones</h3>
+                <button class="close-modal" id="closeRestaurarAsignacionesModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 10px; color:#6c757d; font-size:14px;">
+                    <i class="fas fa-info-circle" style="color:#CC0000;"></i>
+                    Asignaciones eliminadas que pueden ser restauradas. Solo si el <strong>Usuario</strong> y el
+                    <strong>Horario</strong> están activos.
+                </p>
+
+                <div class="table-scroll-wrapper" style="max-height: 450px;">
+                    <table style="min-width: 900px;">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> ID</th>
+                                <th><i class="fas fa-user"></i> Usuario</th>
+                                <th><i class="fas fa-clock"></i> Horario</th>
+                                <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                                <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                                <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                                <th><i class="fas fa-utensils"></i> Ing. Alm.</th>
+                                <th><i class="fas fa-utensils"></i> Sal. Alm.</th>
+                                <th><i class="fas fa-cogs"></i> Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAsignacionesEliminadasBody">
+                            <tr>
+                                <td colspan="9" class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="paginacionAsignacionesEliminadasContainer" class="paginacion-container"
+                    style="display: none; margin-top: 15px;">
+                    <div class="paginacion-info">
+                        Mostrando <span id="inicioAsigElim">0</span> - <span id="finAsigElim">0</span>
+                        de <span id="totalAsigElim">0</span> registros
+                    </div>
+                    <div class="paginacion-buttons">
+                        <button class="btn-paginacion" id="btnPrimeraAsigElim" disabled>⏮ Primera</button>
+                        <button class="btn-paginacion" id="btnAnteriorAsigElim" disabled>◀ Anterior</button>
+                        <span class="paginacion-pagina" id="paginaActualAsigElim">Página 1 de 1</span>
+                        <button class="btn-paginacion" id="btnSiguienteAsigElim" disabled>Siguiente ▶</button>
+                        <button class="btn-paginacion" id="btnUltimaAsigElim" disabled>Última ⏭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR RESTAURACIÓN -->
+    <div id="modalRestaurarAsignacionConfirmar" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash-restore"></i> Confirmar Restauración</h3>
+                <button class="close-modal" id="closeRestaurarAsignacionConfirmModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="restaurarAsignacionMensaje" style="margin-bottom:15px; color:#1a1a2e;"></p>
+
+                <div class="alerta-success">
+                    <p><strong><i class="fas fa-check-circle"></i> Al restaurar:</strong></p>
+                    <ul>
+                        <li>La asignación volverá a estar <strong>activa</strong></li>
+                        <li>Las <strong>marcaciones</strong> relacionadas se restaurarán</li>
+                        <li>Las <strong>evidencias</strong> relacionadas se restaurarán</li>
+                    </ul>
+                </div>
+
+                <div id="restaurarAdvertencia" class="alerta-warning" style="display:none;">
+                    <p id="restaurarAdvertenciaTexto"><i class="fas fa-exclamation-triangle"></i></p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="btnCancelarRestaurarAsignacion"><i class="fas fa-times"></i>
+                        Cancelar</button>
+                    <button class="btn btn-success" id="btnConfirmarRestaurarAsignacion"><i
+                            class="fas fa-trash-restore"></i> Restaurar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ASIGNACIÓN GRUPAL (FECHA ESPECÍFICA) -->
+    <div id="modalAsignacionGrupal" class="modal">
+        <div class="modal-content grupal">
+            <div class="modal-header">
+                <h3><i class="fas fa-users"></i> Asignación Grupal — Fecha Específica</h3>
+                <button class="close-modal" id="closeGrupalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="fechaGrupal"><i class="fas fa-calendar-day"></i> Fecha de Asignación</label>
+                    <input type="date" id="fechaGrupal" required>
+                    <div class="help-text"><i class="fas fa-info-circle"></i> Solo hoy o futuro</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="horarioGrupal"><i class="fas fa-clock"></i> Horario por Defecto</label>
+                        <select id="horarioGrupal">
+                            <option value="">-- Opcional --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="estadoGrupal"><i class="fas fa-toggle-on"></i> Estado por Defecto</label>
+                        <select id="estadoGrupal">
+                            <option value="">-- Opcional --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                        <div style="flex:1; position:relative;">
+                            <i class="fas fa-search"
+                                style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6c757d;"></i>
+                            <input type="text" id="busquedaUsuarioGrupal" placeholder="Buscar usuario..."
+                                style="width:100%; padding:10px 12px 10px 38px; border:2px solid #e8e8e8; border-radius:10px; font-size:14px; background:#fafafa; font-family:inherit;">
+                        </div>
+                        <button type="button" id="btnLimpiarBusquedaGrupal" class="btn btn-secondary"
+                            style="padding:10px 18px;">
+                            <i class="fas fa-times"></i> Limpiar
+                        </button>
+                        <span style="font-size:13px; color:#6c757d; white-space:nowrap;">
+                            Mostrando <span id="mostradosGrupal">0</span> de <span id="totalUsuariosGrupal">0</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="table-scroll-wrapper" style="max-height: 400px;">
+                    <table class="tabla-asignacion-grupal">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-column"><input type="checkbox" id="seleccionarTodos"
+                                        title="Seleccionar todos"></th>
+                                <th><i class="fas fa-user"></i> Usuario</th>
+                                <th><i class="fas fa-clock"></i> Horario</th>
+                                <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                                <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                                <th><i class="fas fa-utensils"></i> Ing. Alm.</th>
+                                <th><i class="fas fa-utensils"></i> Sal. Alm.</th>
+                                <th><i class="fas fa-toggle-on"></i> Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuariosGrupal">
+                            <tr>
+                                <td colspan="8" class="loading">Seleccione una fecha</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" id="btnCancelarGrupal"><i class="fas fa-times"></i>
+                        Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btnGuardarGrupal"><i class="fas fa-save"></i>
+                        Guardar Asignaciones</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NO LABORABLE (FECHA ESPECÍFICA) -->
+    <div id="modalNoLaborable" class="modal">
+        <div class="modal-content" style="max-width: 620px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-ban"></i> Día No Laborable — Fecha Específica</h3>
+                <button class="close-modal" id="closeNoLaborableBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="fechaNoLaborable"><i class="fas fa-calendar-day"></i> Fecha</label>
+                    <input type="date" id="fechaNoLaborable" required>
+                    <div class="help-text"><i class="fas fa-info-circle"></i> Solo hoy o futuro</div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                        <div style="flex:1; position:relative;">
+                            <i class="fas fa-search"
+                                style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6c757d;"></i>
+                            <input type="text" id="busquedaUsuarioNoLaborable" placeholder="Buscar usuario..."
+                                style="width:100%; padding:10px 12px 10px 38px; border:2px solid #e8e8e8; border-radius:10px; font-size:14px; background:#fafafa; font-family:inherit;">
+                        </div>
+                        <button type="button" id="btnLimpiarBusquedaNoLaborable" class="btn btn-secondary"
+                            style="padding:10px 18px;">
+                            <i class="fas fa-times"></i> Limpiar
+                        </button>
+                        <span style="font-size:13px; color:#6c757d; white-space:nowrap;">
+                            Mostrando <span id="mostradosNoLaborable">0</span> de <span
+                                id="totalUsuariosNoLaborable">0</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="table-scroll-wrapper" style="max-height: 400px;">
+                    <table class="tabla-asignacion-grupal">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-column"><input type="checkbox" id="seleccionarTodosNoLaborable"
+                                        title="Seleccionar todos"></th>
+                                <th><i class="fas fa-user"></i> Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaUsuariosNoLaborable">
+                            <tr>
+                                <td colspan="2" class="loading">Seleccione una fecha</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" id="btnCancelarNoLaborable"><i
+                            class="fas fa-times"></i> Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarNoLaborable"><i class="fas fa-save"></i>
+                        Marcar como No Laborable</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRO MASIVO POR RANGO -->
+    <div id="modalRegistroMasivo" class="modal">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-alt"></i> Asignación Grupal — Rango de Fechas</h3>
+                <button class="close-modal" id="closeRegistroMasivoBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="formRegistroMasivo">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Rango de Fechas</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fecha Inicio</label>
+                                <input type="date" id="fechaInicioMasivo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Fin</label>
+                                <input type="date" id="fechaFinMasivo" required>
+                            </div>
+                        </div>
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="infoRangoMasivo">Seleccione un rango (hoy o futuro)</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="horarioMasivo"><i class="fas fa-clock"></i> Horario</label>
+                            <select id="horarioMasivo">
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estadoMasivo"><i class="fas fa-toggle-on"></i> Estado</label>
+                            <select id="estadoMasivo">
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                            <div style="flex:1; position:relative;">
+                                <i class="fas fa-search"
+                                    style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6c757d;"></i>
+                                <input type="text" id="busquedaUsuarioMasivo" placeholder="Buscar usuario..."
+                                    style="width:100%; padding:10px 12px 10px 38px; border:2px solid #e8e8e8; border-radius:10px; font-size:14px; background:#fafafa; font-family:inherit;">
+                            </div>
+                            <button type="button" id="btnLimpiarBusquedaMasivo" class="btn btn-secondary"
+                                style="padding:10px 18px;">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                            <span style="font-size:13px; color:#6c757d; white-space:nowrap;">
+                                Mostrando <span id="mostradosMasivo">0</span> de <span id="totalUsuariosMasivo">0</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Usuarios</label>
+                        <div class="table-scroll-wrapper" style="max-height: 300px;">
+                            <table class="tabla-asignacion-grupal">
+                                <thead>
+                                    <tr>
+                                        <th class="checkbox-column"><input type="checkbox" id="seleccionarTodosMasivo"
+                                                title="Seleccionar todos"></th>
+                                        <th><i class="fas fa-user"></i> Usuario</th>
+                                        <th><i class="fas fa-clock"></i> Horario</th>
+                                        <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                                        <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                                        <th><i class="fas fa-utensils"></i> Ing. Alm.</th>
+                                        <th><i class="fas fa-utensils"></i> Sal. Alm.</th>
+                                        <th><i class="fas fa-toggle-on"></i> Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaUsuariosMasivo">
+                                    <tr>
+                                        <td colspan="8" class="loading">Seleccione un rango</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnCancelarMasivo"><i
+                                class="fas fa-times"></i> Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnPrevisualizarMasivo"><i
+                                class="fas fa-eye"></i> Previsualizar</button>
+                        <button type="button" class="btn btn-success" id="btnRegistrarYaMasivo"><i
+                                class="fas fa-bolt"></i> Registrar Ya</button>
+                    </div>
+                </div>
+
+                <!-- Previsualización -->
+                <div id="previsualizacionMasivo" style="display: none;">
+                    <h4 style="margin-bottom: 15px; color:#1a1a2e;">
+                        <i class="fas fa-list"></i> Resumen de Asignaciones a Crear
+                    </h4>
+                    <div class="table-scroll-wrapper" style="max-height: 350px;">
+                        <table style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-user"></i> Usuario</th>
+                                    <th><i class="fas fa-clock"></i> Horario</th>
+                                    <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                                    <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                                    <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                                    <th><i class="fas fa-utensils"></i> Ing. Alm.</th>
+                                    <th><i class="fas fa-utensils"></i> Sal. Alm.</th>
+                                    <th><i class="fas fa-toggle-on"></i> Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaPrevisualizacionMasivo">
+                                <tr>
+                                    <td colspan="8" class="loading">Generando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top:15px; padding:12px; background:#f8f9fa; border-radius:8px;">
+                        <strong>Total de asignaciones a crear:</strong>
+                        <span id="totalAsignacionesMasivo" style="color:#CC0000; font-size:18px;">0</span>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnVolverFormMasivo"><i
+                                class="fas fa-arrow-left"></i> Volver</button>
+                        <button type="button" class="btn btn-success" id="btnConfirmarGenerarMasivo"><i
+                                class="fas fa-save"></i> Guardar Asignaciones</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR REGISTRO DIRECTO (MASIVO) -->
+    <div id="modalConfirmarRegistroDirectoMasivo" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#af0505 0%,#e00000 100%);">
+                <h3><i class="fas fa-exclamation-triangle"></i> Registro Directo</h3>
+                <button class="close-modal" id="closeConfirmarRegistroDirectoBtn">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 20px;">
+                <div style="font-size: 60px; color:#ffc107;">⚡</div>
+                <h4 style="color:#1a1a2e; margin:15px 0;">¿Registrar sin previsualizar?</h4>
+                <p style="color:#6c757d; margin-bottom:20px;">Se crearán las asignaciones con la configuración actual.
+                </p>
+
+                <div class="button-group" style="justify-content:center;">
+                    <button type="button" class="btn btn-secondary" id="btnCancelarConfirmarRegistroDirecto"><i
+                            class="fas fa-times"></i> Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnDeseoPrevisualizarMasivo"><i
+                            class="fas fa-eye"></i> Previsualizar</button>
+                    <button type="button" class="btn btn-success" id="btnConfirmarRegistroDirectoMasivo"><i
+                            class="fas fa-bolt"></i> Sí, Registrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PROGRESO MASIVO -->
+    <div id="modalProgresoMasivo" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-spinner fa-spin"></i> Registrando Asignaciones Masivas</h3>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span id="progresoMasivoTexto" style="font-weight:600;">Iniciando...</span>
+                        <span id="progresoMasivoPorcentaje" style="font-weight:600; color:#CC0000;">0%</span>
+                    </div>
+                    <div class="progreso-bar-container" style="height:30px;">
+                        <div id="progresoMasivoBar" class="progreso-bar" style="width:0%;">0%</div>
+                    </div>
+                </div>
+
+                <div
+                    style="background:#f8f9fa; padding:12px; border-radius:8px; margin-bottom:20px; border-left:4px solid #6c757d;">
+                    <div style="font-size:12px; color:#6c757d;">Servidor Principal</div>
+                    <div style="font-weight:600; margin-top:4px;">
+                        <span id="estadoSQLMasivo">⏳ Pendiente</span>
+                    </div>
+                </div>
+
+                <div style="background:#f8f9fa; padding:12px; border-radius:8px; max-height:200px; overflow-y:auto;">
+                    <div id="detalleProgresoMasivo" style="font-size:13px; color:#495057;"></div>
+                </div>
+
+                <div class="button-group" style="margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" id="btnCerrarProgresoMasivo" style="display:none;">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NO LABORABLE MASIVO (RANGO) -->
+    <div id="modalNoLaborableMasivo" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-ban"></i> Día No Laborable — Rango de Fechas</h3>
+                <button class="close-modal" id="closeNoLaborableMasivoBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="formNoLaborableMasivo">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Rango de Fechas</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fecha Inicio</label>
+                                <input type="date" id="fechaInicioNoLaborableMasivo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Fin</label>
+                                <input type="date" id="fechaFinNoLaborableMasivo" required>
+                            </div>
+                        </div>
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="infoRangoNoLaborableMasivo">Seleccione un rango (hoy o futuro)</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                            <div style="flex:1; position:relative;">
+                                <i class="fas fa-search"
+                                    style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6c757d;"></i>
+                                <input type="text" id="busquedaUsuarioNoLaborableMasivo" placeholder="Buscar usuario..."
+                                    style="width:100%; padding:10px 12px 10px 38px; border:2px solid #e8e8e8; border-radius:10px; font-size:14px; background:#fafafa; font-family:inherit;">
+                            </div>
+                            <button type="button" id="btnLimpiarBusquedaNoLaborableMasivo" class="btn btn-secondary"
+                                style="padding:10px 18px;">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                            <span style="font-size:13px; color:#6c757d; white-space:nowrap;">
+                                Mostrando <span id="mostradosNoLaborableMasivo">0</span> de <span
+                                    id="totalUsuariosNoLaborableMasivo">0</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-users"></i> Usuarios</label>
+                        <div class="table-scroll-wrapper" style="max-height: 300px;">
+                            <table class="tabla-asignacion-grupal">
+                                <thead>
+                                    <tr>
+                                        <th class="checkbox-column"><input type="checkbox"
+                                                id="seleccionarTodosNoLaborableMasivo" title="Seleccionar todos"></th>
+                                        <th><i class="fas fa-user"></i> Usuario</th>
+                                        <th><i class="fas fa-info-circle"></i> Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaUsuariosNoLaborableMasivo">
+                                    <tr>
+                                        <td colspan="3" class="loading">Seleccione un rango</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnCancelarNoLaborableMasivo"><i
+                                class="fas fa-times"></i> Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnPrevisualizarNoLaborableMasivo"><i
+                                class="fas fa-eye"></i> Previsualizar</button>
+                        <button type="button" class="btn btn-success" id="btnRegistrarYaNoLaborableMasivo"><i
+                                class="fas fa-bolt"></i> Registrar Ya</button>
+                    </div>
+                </div>
+
+                <div id="previsualizacionNoLaborableMasivo" style="display: none;">
+                    <h4 style="margin-bottom: 15px; color:#1a1a2e;"><i class="fas fa-list"></i> Resumen</h4>
+                    <div class="table-scroll-wrapper" style="max-height: 350px;">
+                        <table style="min-width: 600px;">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-user"></i> Usuario</th>
+                                    <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                                    <th><i class="fas fa-info-circle"></i> Observación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaPrevisualizacionNoLaborableMasivo">
+                                <tr>
+                                    <td colspan="3" class="loading">Generando...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top:15px; padding:12px; background:#f8f9fa; border-radius:8px;">
+                        <strong>Total de días no laborables a crear:</strong>
+                        <span id="totalNoLaborableMasivo" style="color:#CC0000; font-size:18px;">0</span>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnVolverFormNoLaborableMasivo"><i
+                                class="fas fa-arrow-left"></i> Volver</button>
+                        <button type="button" class="btn btn-success" id="btnConfirmarGenerarNoLaborableMasivo"><i
+                                class="fas fa-save"></i> Marcar como No Laborable</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR REGISTRO DIRECTO (NO LABORABLE) -->
+    <div id="modalConfirmarRegistroDirectoNoLaborable" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header" style="background:linear-gradient(135deg,#af0505 0%,#e00000 100%);">
+                <h3><i class="fas fa-exclamation-triangle"></i> Registro Directo</h3>
+                <button class="close-modal" id="closeConfirmarRegistroDirectoNoLaborableBtn">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 20px;">
+                <div style="font-size: 60px; color:#ffc107;">⚡</div>
+                <h4 style="color:#1a1a2e; margin:15px 0;">¿Registrar sin previsualizar?</h4>
+                <p style="color:#6c757d; margin-bottom:20px;">Se crearán los días no laborables con la configuración
+                    actual.</p>
+
+                <div class="button-group" style="justify-content:center;">
+                    <button type="button" class="btn btn-secondary"
+                        id="btnCancelarConfirmarRegistroDirectoNoLaborable"><i class="fas fa-times"></i>
+                        Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnDeseoPrevisualizarNoLaborableMasivo"><i
+                            class="fas fa-eye"></i> Previsualizar</button>
+                    <button type="button" class="btn btn-success" id="btnConfirmarRegistroDirectoNoLaborableMasivo"><i
+                            class="fas fa-bolt"></i> Sí, Registrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PROGRESO NO LABORABLE MASIVO -->
+    <div id="modalProgresoNoLaborableMasivo" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-spinner fa-spin"></i> Registrando Días No Laborables</h3>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span id="progresoNoLaborableMasivoTexto" style="font-weight:600;">Iniciando...</span>
+                        <span id="progresoNoLaborableMasivoPorcentaje" style="font-weight:600; color:#dc3545;">0%</span>
+                    </div>
+                    <div class="progreso-bar-container" style="height:30px;">
+                        <div id="progresoNoLaborableMasivoBar" class="progreso-bar"
+                            style="width:0%; background:linear-gradient(135deg,#dc3545 0%,#a71d2a 100%);">0%</div>
+                    </div>
+                </div>
+
+                <div
+                    style="background:#f8f9fa; padding:12px; border-radius:8px; margin-bottom:20px; border-left:4px solid #6c757d;">
+                    <div style="font-size:12px; color:#6c757d;">Servidor Principal</div>
+                    <div style="font-weight:600; margin-top:4px;">
+                        <span id="estadoSQLNoLaborableMasivo">⏳ Pendiente</span>
+                    </div>
+                </div>
+
+                <div style="background:#f8f9fa; padding:12px; border-radius:8px; max-height:200px; overflow-y:auto;">
+                    <div id="detalleProgresoNoLaborableMasivo" style="font-size:13px; color:#495057;"></div>
+                </div>
+
+                <div class="button-group" style="margin-top:20px;">
+                    <button type="button" class="btn btn-secondary" id="btnCerrarProgresoNoLaborableMasivo"
+                        style="display:none;">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VER NO LABORABLES REGISTRADOS -->
+    <div id="modalVerNoLaborables" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-times"></i> Días No Laborables Registrados</h3>
+                <button class="close-modal" id="closeVerNoLaborablesBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:15px; color:#6c757d; font-size:14px;">
+                    <i class="fas fa-info-circle" style="color:#CC0000;"></i>
+                    Lista de días registrados como "NO LABORA - DÍA NO LABORABLE".
+                </p>
+
+                <div
+                    style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px; padding:12px; background:#f8f9fa; border-radius:10px;">
+                    <div style="flex:1; min-width:150px;">
+                        <label
+                            style="font-size:12px; font-weight:600; color:#495057; display:block; margin-bottom:4px;">
+                            <i class="fas fa-user" style="color:#CC0000;"></i> Usuario
+                        </label>
+                        <select id="filtroUsuarioNoLaborable"
+                            style="width:100%; padding:8px 10px; border:2px solid #e8e8e8; border-radius:8px; font-size:13px; background:white;">
+                            <option value="">-- Todos --</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; min-width:150px;">
+                        <label
+                            style="font-size:12px; font-weight:600; color:#495057; display:block; margin-bottom:4px;">
+                            <i class="fas fa-calendar-day" style="color:#CC0000;"></i> Desde
+                        </label>
+                        <input type="date" id="filtroFechaDesdeNoLaborable"
+                            style="width:100%; padding:8px 10px; border:2px solid #e8e8e8; border-radius:8px; font-size:13px;">
+                    </div>
+                    <div style="flex:1; min-width:150px;">
+                        <label
+                            style="font-size:12px; font-weight:600; color:#495057; display:block; margin-bottom:4px;">
+                            <i class="fas fa-calendar-day" style="color:#CC0000;"></i> Hasta
+                        </label>
+                        <input type="date" id="filtroFechaHastaNoLaborable"
+                            style="width:100%; padding:8px 10px; border:2px solid #e8e8e8; border-radius:8px; font-size:13px;">
+                    </div>
+                    <div style="display:flex; align-items:flex-end; gap:8px;">
+                        <button class="btn btn-recargar" id="btnFiltrarNoLaborables" style="padding:8px 15px;">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                        <button class="btn btn-secondary" id="btnLimpiarFiltrosNoLaborables" style="padding:8px 15px;">
+                            <i class="fas fa-broom"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-scroll-wrapper" style="max-height: 400px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> ID</th>
+                                <th><i class="fas fa-user"></i> Usuario</th>
+                                <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                                <th><i class="fas fa-info-circle"></i> Observación</th>
+                                <th><i class="fas fa-user-plus"></i> Creado por</th>
+                                <th><i class="fas fa-calendar-plus"></i> Fecha Creación</th>
+                                <th style="width: 100px;"><i class="fas fa-cogs"></i> Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaNoLaborablesBody">
+                            <tr>
+                                <td colspan="7" class="loading">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="paginacionNoLaborablesContainer" class="paginacion-container"
+                    style="display:none; margin-top:15px;">
+                    <div class="paginacion-info">
+                        Mostrando <span id="inicioNoLaborables">0</span> - <span id="finNoLaborables">0</span>
+                        de <span id="totalNoLaborables">0</span> registros
+                    </div>
+                    <div class="paginacion-buttons">
+                        <button class="btn-paginacion" id="btnPrimeraNoLaborables" disabled>⏮ Primera</button>
+                        <button class="btn-paginacion" id="btnAnteriorNoLaborables" disabled>◀ Anterior</button>
+                        <span class="paginacion-pagina" id="paginaActualNoLaborables">Página 1 de 1</span>
+                        <button class="btn-paginacion" id="btnSiguienteNoLaborables" disabled>Siguiente ▶</button>
+                        <button class="btn-paginacion" id="btnUltimaNoLaborables" disabled>Última ⏭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         SCRIPTS — orden correcto + defer
+         ============================================ -->
+
+    <!-- FullCalendar -->
+    <script defer src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales-all.global.min.js"></script>
+
+    <!-- Utilidades -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+
+    <!-- Services -->
+    <script defer src="../services/Auth_Services.js"></script>
+    <script defer src="../services/Asignacion_Services.js"></script>
+
+    <!-- Controllers -->
+    <script defer src="../controllers/Asignacion_Controller.js"></script>
+    <script defer src="../controllers/Registro_Masivo_Controller.js"></script>
+    <script defer src="../controllers/Ver_No_Laborables_Controller.js"></script>
+    <script defer src="../controllers/No_Laborable_Masivo_Controller.js"></script>
+
+    <!-- Bootstrap -->
+    <script defer src="../../public/bootstrap/Asignacion_Bootstrap.js"></script>
+
+    <!-- Bloqueo (opcional) -->
+    <script defer src="../../public/utils/Bloqueo.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencias - Registro de Asistencia</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+
+    <!-- face-api.js (detección facial) -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <!-- Prevenir caché -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- CSS del módulo -->
+    <link rel="stylesheet" href="../css/Registro_Asistencia.css">
+</head>
+
+<body>
+
+    <!-- ============================================ -->
+    <!-- TOAST DE CARGA SILENCIOSA                    -->
+    <!-- ============================================ -->
+    <div id="toastCarga" class="toast-carga">
+        <i class="fas fa-spinner"></i>
+        <span id="toastCargaTexto">Preparando tu jornada...</span>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL DE CARGA INICIAL                       -->
+    <!-- ============================================ -->
+    <div id="modalCarga" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-body" style="padding: 30px;">
+                <div style="font-size: 50px; margin-bottom: 20px;">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <h3 style="color: #1a1a2e; margin-bottom: 10px;">Cargando...</h3>
+                <p style="color: #6c757d;">Espere un momento, estamos cargando su asignación de horario para hoy.</p>
+                <div style="margin-top: 20px;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL DE CARGA DE PROCESO                    -->
+    <!-- ============================================ -->
+    <div id="modalCargaProceso" class="modal modal-obligatorio">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-body" style="padding: 30px;">
+                <div style="font-size: 50px; margin-bottom: 20px;">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <h3 id="cargaProcesoTitulo" style="color: #1a1a2e; margin-bottom: 10px;">Procesando...</h3>
+                <p id="cargaProcesoMensaje" style="color: #6c757d;">
+                    Espere un momento, estamos procesando su registro.
+                </p>
+                <div style="margin-top: 20px;">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- HEADER CORPORATIVO                           -->
+    <!-- ============================================ -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+            <div>
+                <h1>Control de <span>Asistencias</span></h1>
+                <div class="subtitle"><i class="fas fa-clock"></i> Registro de Marcación</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Empleado</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Empleado</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn">
+                    <i class="fas fa-home"></i> Menú Principal
+                </button>
+                <button class="dropdown-item" id="perfilBtn">
+                    <i class="fas fa-user-cog"></i> Mi Perfil
+                </button>
+                <button class="dropdown-item logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- CONTENIDO PRINCIPAL                          -->
+    <!-- ============================================ -->
+    <main class="main-container">
+        <div class="asistencia-card">
+            <div class="card-header">
+                <h2>
+                    <i class="fas fa-clock"></i> Registro de Asistencia
+                    <span id="fechaActual" style="font-size: 14px; font-weight: normal; opacity: 0.8;"></span>
+                </h2>
+                <p><i class="fas fa-arrow-right"></i> Registre sus horarios de entrada, salida y almuerzo</p>
+            </div>
+
+            <div class="card-body">
+                <!-- Botones de Marcación -->
+                <div class="marcacion-buttons">
+                    <div class="btn-marcacion" id="btnIngreso">
+                        <div class="icon"><i class="fas fa-sign-in-alt"></i></div>
+                        <h3>Ingreso Real</h3>
+                        <p>Registrar hora de llegada</p>
+                        <div class="hora-registrada" id="horaIngreso"></div>
+                    </div>
+
+                    <div class="btn-marcacion" id="btnIngresoAlmuerzo">
+                        <div class="icon"><i class="fas fa-utensils"></i></div>
+                        <h3>Ingreso Almuerzo</h3>
+                        <p>Registrar inicio de almuerzo</p>
+                        <div class="hora-registrada" id="horaIngresoAlmuerzo"></div>
+                    </div>
+
+                    <div class="btn-marcacion" id="btnSalidaAlmuerzo">
+                        <div class="icon"><i class="fas fa-running"></i></div>
+                        <h3>Salida Almuerzo</h3>
+                        <p>Registrar fin de almuerzo</p>
+                        <div class="hora-registrada" id="horaSalidaAlmuerzo"></div>
+                    </div>
+
+                    <div class="btn-marcacion" id="btnSalida">
+                        <div class="icon"><i class="fas fa-sign-out-alt"></i></div>
+                        <h3>Salida Real</h3>
+                        <p>Registrar hora de salida</p>
+                        <div class="hora-registrada" id="horaSalida"></div>
+                    </div>
+                </div>
+
+                <!-- Información del Turno -->
+                <div class="info-turno">
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-calendar-alt"></i> Turno Asignado</div>
+                        <div class="value" id="turnoAsignado">Cargando...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-laptop-house"></i> Tipo de Horario</div>
+                        <div class="value" id="tipoHorarioValue">--</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-clock"></i> Hora de Ingreso</div>
+                        <div class="value" id="horaIngresoEsperada">--:--</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-clock"></i> Hora de Salida</div>
+                        <div class="value" id="horaSalidaEsperada">--:--</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-toggle-on"></i> Estado</div>
+                        <div class="value" id="estadoMarcacion">--</div>
+                    </div>
+                </div>
+
+                <div class="info-turno">
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-utensils"></i> Ingreso Almuerzo</div>
+                        <div class="value" id="horaIngresoAlmuerzoEsperada">--:--</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-utensils"></i> Salida Almuerzo</div>
+                        <div class="value" id="horaSalidaAlmuerzoEsperada">--:--</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label"><i class="fas fa-hourglass-half"></i> Duración Almuerzo</div>
+                        <div class="value" id="duracionAlmuerzo">-- min</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Registro del Día (opcional, descomentar si se usa) -->
+        <!--
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="tablaRegistro">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-tag"></i> Evento</th>
+                            <th><i class="fas fa-clock"></i> Hora Registrada</th>
+                            <th><i class="fas fa-toggle-on"></i> Estado</th>
+                            <th><i class="fas fa-comment"></i> Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaRegistroBody">
+                        <tr><td colspan="4" class="loading"><i class="fas fa-spinner"></i> Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        -->
+    </main>
+
+    <!-- ============================================ -->
+    <!-- MODAL: JUSTIFICACIÓN DE TARDANZA             -->
+    <!-- ============================================ -->
+    <div id="modalJustificacion" class="modal modal-obligatorio">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="modalJustificacionTitulo">
+                    <i class="fas fa-exclamation-triangle"></i> Justificación de Tardanza
+                </h3>
+            </div>
+            <div class="modal-body">
+                <p id="modalJustificacionMensaje" style="margin-bottom: 15px; color: #1a1a2e;">
+                    Ha marcado su ingreso fuera del horario establecido. Por favor, justifique el motivo:
+                </p>
+
+                <div class="form-group">
+                    <label for="observacion"><i class="fas fa-comment"></i> Motivo de la tardanza</label>
+                    <textarea id="observacion" rows="3" placeholder="Describa el motivo de su tardanza..."></textarea>
+                </div>
+
+                <!-- Evidencia de tardanza -->
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f0f0;">
+                    <label
+                        style="display: block; margin-bottom: 8px; font-weight: 600; color: #1a1a2e; font-size: 13px;">
+                        <i class="fas fa-paperclip" style="color: #CC0000;"></i>
+                        Evidencia (Opcional)
+                        <span style="font-weight: normal; font-size: 12px; color: #6c757d;">
+                            JPG, PNG o PDF (Máx 5MB)
+                        </span>
+                    </label>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="file" id="inputEvidenciaTardanza" accept=".jpg,.jpeg,.png,.pdf"
+                            style="display: none;">
+                        <button type="button" class="btn btn-secondary" id="btnSubirEvidenciaTardanza"
+                            style="font-size: 13px;">
+                            <i class="fas fa-upload"></i> Subir archivo
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btnEliminarEvidenciaTardanza"
+                            style="display: none; font-size: 13px;">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                        <span id="nombreArchivoEvidenciaTardanza" style="font-size: 13px; color: #6c757d;">
+                            Ningún archivo seleccionado
+                        </span>
+                    </div>
+
+                    <div id="previewEvidenciaTardanza" style="display: none; margin-top: 10px;"></div>
+
+                    <p style="font-size: 11px; color: #adb5bd; margin-top: 8px;">
+                        <i class="fas fa-info-circle"></i>
+                        La evidencia se guardará junto con su justificación de tardanza.
+                    </p>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" id="btnOmitirJustificacion">
+                        <i class="fas fa-times"></i> Omitir
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarJustificacion">
+                        <i class="fas fa-save"></i> Guardar Justificación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: CONFIRMAR OMISIÓN                     -->
+    <!-- ============================================ -->
+    <div id="modalConfirmarOmitir" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Omisión</h3>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: #1a1a2e;">
+                    ¿Está seguro de que desea omitir la justificación?
+                </p>
+                <div
+                    style="background: #f8d7da; padding: 16px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+                    <p style="color: #721c24; font-size: 13px;">
+                        <strong><i class="fas fa-exclamation-circle"></i> Advertencia:</strong>
+                        Si omite la justificación, se registrará automáticamente como "NO JUSTIFICÓ" en la observación.
+                    </p>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="btnCancelarOmitir">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-danger" id="btnConfirmarOmitir">
+                        <i class="fas fa-check"></i> Sí, Omitir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: BLOQUEO POR UBICACIÓN                 -->
+    <!-- ============================================ -->
+    <div id="modalBloqueoUbicacion" class="modal modal-obligatorio">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #8B0000 100%);">
+                <h3><i class="fas fa-map-marker-alt"></i> Ubicación No Permitida</h3>
+            </div>
+            <div class="modal-body" style="padding: 20px 22px;">
+
+                <div class="bloqueo-usuario">
+                    <span class="bloqueo-usuario-nombre" id="bloqueoUsuarioNombre">--</span>
+                    <span class="bloqueo-usuario-id" id="bloqueoUsuarioId">--</span>
+                </div>
+
+                <div class="bloqueo-mensaje" id="bloqueoMensajePrincipal">
+                    Usted no se encuentra dentro del área permitida.
+                </div>
+
+                <div class="bloqueo-info-compacta">
+                    <div class="bloqueo-linea-info" id="lineaPrecision">
+                        <i class="fas fa-satellite-dish"></i>
+                        <span>Precisión GPS: <strong id="bloqueoPrecision">--</strong></span>
+                        <span id="bloqueoPrecisionAlerta" class="bloqueo-alerta"></span>
+                    </div>
+
+                    <div class="bloqueo-linea-info" id="lineaInstruccion">
+                        <i class="fas fa-lightbulb"></i>
+                        <span id="bloqueoInstruccion">Asegúrese de estar dentro del área permitida.</span>
+                    </div>
+
+                    <div class="bloqueo-linea-info bloqueo-linea-warning" id="lineaAdvertencia">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="bloqueoAdvertencia">
+                            Debe estar en una de las sucursales para registrar asistencia.
+                        </span>
+                    </div>
+
+                    <div class="bloqueo-linea-info" id="lineaHorario">
+                        <i class="fas fa-clock"></i>
+                        <span>Horario Asignado: <strong id="bloqueoTurno">--</strong></span>
+                    </div>
+
+                    <div class="bloqueo-coordenadas" id="lineaCoordenadasActuales">
+                        <div class="bloqueo-coord-titulo">
+                            <i class="fas fa-crosshairs"></i> Coordenadas actuales:
+                        </div>
+                        <div class="bloqueo-coord-valor" id="bloqueoCoordenadasActuales">
+                            Lat: --, Lng: -- (precisión: --m)
+                        </div>
+                    </div>
+
+                    <div class="bloqueo-coordenadas" id="lineaCoordenadasEmpresa">
+                        <div class="bloqueo-coord-titulo">
+                            <i class="fas fa-building"></i> Coordenadas de la empresa:
+                        </div>
+                        <div class="bloqueo-coord-valor" id="bloqueoCoordenadasEmpresa">
+                            📍 Sucursal más cercana: -- (--m)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bloqueo-botones">
+                    <button class="btn btn-secondary" id="btnReintentarUbicacion">
+                        <i class="fas fa-sync-alt"></i> Reintentar
+                    </button>
+                    <button class="btn btn-danger" id="btnSalirBloqueo">
+                        <i class="fas fa-sign-out-alt"></i> Salir al Menú
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: VERIFICACIÓN DE UBICACIÓN             -->
+    <!-- ============================================ -->
+    <div id="modalVerificandoUbicacion" class="modal modal-obligatorio">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-body" style="padding: 30px;">
+                <div style="font-size: 50px; margin-bottom: 20px;">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3 style="color: #1a1a2e; margin-bottom: 10px;">Verificando Ubicación</h3>
+                <p style="color: #6c757d; font-size: 14px; margin-bottom: 20px;">
+                    Por favor, espere mientras verificamos su ubicación...
+                </p>
+                <div style="margin-top: 20px;">
+                    <div class="spinner"></div>
+                </div>
+                <p id="verificandoUbicacionMensaje" style="color: #adb5bd; font-size: 12px; margin-top: 15px;">
+                    Obteniendo coordenadas GPS...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: CAPTURA DE SELFIE                     -->
+    <!-- ============================================ -->
+    <div id="modalSelfie" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-camera"></i> Captura de Evidencia</h3>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p style="margin-bottom: 15px; color: #6c757d;" id="selfieMensaje">
+                    Por favor, tome una foto para registrar su evidencia
+                </p>
+
+                <div id="videoContainer">
+                    <video id="videoSelfie" autoplay playsinline style="width: 100%; display: block;"></video>
+                    <canvas id="canvasSelfie" style="display: none;"></canvas>
+
+                    <div id="countdownOverlay">
+                        <span id="countdownNumber">3</span>
+                    </div>
+
+                    <div id="faceDetectionIndicator">
+                        <i class="fas fa-face-smile"></i> Detectando rostro...
+                    </div>
+
+                    <button type="button" id="btnCambiarCamara" title="Cambiar cámara frontal/trasera" style="
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: rgba(0, 0, 0, 0.65);
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 42px;
+                        height: 42px;
+                        cursor: pointer;
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                        transition: all 0.3s ease;
+                        z-index: 5;
+                        backdrop-filter: blur(6px);
+                    ">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+
+                <div class="button-group" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                    <button class="btn btn-secondary" id="btnCancelarSelfie">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-success" id="btnConfirmarSelfie" style="display: none;">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
+                    <button class="btn btn-primary" id="btnTomarSelfie" disabled>
+                        <i class="fas fa-camera"></i> Tomar Foto
+                    </button>
+                </div>
+
+                <div id="previewContainer" style="display: none; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #28a745;">
+                        <i class="fas fa-check-circle"></i> Foto tomada correctamente
+                    </p>
+                    <img id="previewSelfie" style="max-width: 200px; border-radius: 8px; border: 2px solid #28a745;">
+                </div>
+
+                <div id="compressionProgress" style="display: none; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #6c757d;">
+                        <i class="fas fa-compress"></i> Comprimiendo imagen...
+                    </p>
+                    <div style="width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden;">
+                        <div id="compressionBar"
+                            style="width: 0%; height: 100%; background: #CC0000; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPTS — orden correcto + defer             -->
+    <!-- ============================================ -->
+
+    <!-- 1) Utilidades -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+
+    <!-- 2) Services -->
+    <script defer src="../services/Auth_Services.js"></script>
+    <script defer src="../services/Registro_Asistencia_Services.js"></script>
+
+    <!-- 3) Sub-controllers (deben cargarse antes del principal) -->
+    <script defer src="../controllers/GPS_Controller.js"></script>
+    <script defer src="../controllers/Selfie_Controller.js"></script>
+    <script defer src="../controllers/Justificacion_Controller.js"></script>
+
+    <!-- 4) Controller principal -->
+    <script defer src="../controllers/Registro_Asistencia_Controller.js"></script>
+
+    <!-- 5) Bootstrap (instancia todo) -->
+    <script defer src="../../public/bootstrap/Registro_Bootstrap.js"></script>
+
+    <!-- 6) Bloqueo (opcional) -->
+    <script defer src="../../public/utils/Bloqueo.js"></script>
+</body>
+
+</html>

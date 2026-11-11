@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencias - Gestión de Marcaciones</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- XLSX (exportación a Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Leaflet (mapa de evidencia) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- CSS del módulo -->
+    <link rel="stylesheet" href="../css/Marcaciones.css">
+</head>
+
+<body>
+    <!-- ============================================ -->
+    <!-- HEADER CORPORATIVO                           -->
+    <!-- ============================================ -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div>
+                <h1>Control de Asistencias</h1>
+                <div class="subtitle"><i class="fas fa-fingerprint"></i> Gestión de Marcaciones</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Administrador</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Administrador</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn">
+                    <i class="fas fa-home"></i> Menú Principal
+                </button>
+                <button class="dropdown-item" id="perfilBtn">
+                    <i class="fas fa-user-cog"></i> Mi Perfil
+                </button>
+                <button class="dropdown-item logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================ -->
+    <!-- CONTENIDO PRINCIPAL                          -->
+    <!-- ============================================ -->
+    <main class="main-container">
+        <div class="actions-bar">
+            <h2>
+                <i class="fas fa-clipboard-list"></i> Gestión de <span>Marcaciones</span>
+            </h2>
+            <div class="fuente-selector-container">
+                <button class="btn btn-exportar-excel" id="btnExportarExcel"
+                    style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color: white; box-shadow: 0 3px 10px rgba(40, 167, 69, 0.25);">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filtros-container">
+            <div class="filtro-group" style="flex: 1.5;">
+                <label><i class="fas fa-calendar-day"></i> Fecha Específica</label>
+                <input type="date" id="filtroFechaEspecifica">
+                <small><i class="fas fa-info-circle"></i> Prioritario sobre rango de fechas</small>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-user"></i> Usuario</label>
+                <select id="filtroUsuario">
+                    <option value="">-- Todos los usuarios --</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-calendar-plus"></i> Fecha Desde</label>
+                <input type="date" id="filtroFechaDesde">
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-calendar-minus"></i> Fecha Hasta</label>
+                <input type="date" id="filtroFechaHasta">
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-toggle-on"></i> Estado Marcación</label>
+                <select id="filtroEstadoMarcacion">
+                    <option value="">-- Todos --</option>
+                    <option value="A TIEMPO">A Tiempo</option>
+                    <option value="TARDANZA">Tardanza</option>
+                    <option value="FALTO">Faltó</option>
+                    <option value="NO LABORA">No Labora</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-utensils"></i> Estado Almuerzo Ingreso</label>
+                <select id="filtroEstadoAlmuerzoIng">
+                    <option value="">-- Todos --</option>
+                    <option value="A TIEMPO">A Tiempo</option>
+                    <option value="TARDANZA">Tardanza</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-running"></i> Estado Almuerzo Salida</label>
+                <select id="filtroEstadoAlmuerzoSal">
+                    <option value="">-- Todos --</option>
+                    <option value="A TIEMPO">A Tiempo</option>
+                    <option value="EXCESO">Exceso</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-tshirt"></i> Observación Vestimenta</label>
+                <select id="filtroObsVestimenta">
+                    <option value="">-- Todas --</option>
+                    <option value="NINGUNO">Ninguno</option>
+                    <option value="CUMPLIO">Cumplió</option>
+                    <option value="NO CUMPLIO">No Cumplió</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-utensils"></i> Obs. Almuerzo Ingreso</label>
+                <select id="filtroObsIngAlmuerzo">
+                    <option value="">-- Todas --</option>
+                    <option value="NINGUNA">Ninguna</option>
+                    <option value="TARDANZA JUSTIFICADA">Tardanza Justificada</option>
+                    <option value="TARDANZA NO JUSTIFICADA">Tardanza No Justificada</option>
+                    <option value="JUSTIFICACIÓN NO VÁLIDA">Justificación No Válida</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-running"></i> Obs. Almuerzo Salida</label>
+                <select id="filtroObsSalAlmuerzo">
+                    <option value="">-- Todas --</option>
+                    <option value="NINGUNA">Ninguna</option>
+                    <option value="EXCESO JUSTIFICADO">Exceso Justificado</option>
+                    <option value="EXCESO NO JUSTIFICADO">Exceso No Justificado</option>
+                    <option value="JUSTIFICACIÓN NO VÁLIDA">Justificación No Válida</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <label><i class="fas fa-comment"></i> Observación de Ingreso</label>
+                <select id="filtroObservacion">
+                    <option value="">-- Todas --</option>
+                    <option value="NINGUNO">Ninguno</option>
+                    <option value="NO LABORA">No Labora</option>
+                    <option value="FALTA JUSTIFICADA">Falta Justificada</option>
+                    <option value="NO JUSTIFICÓ FALTA">No Justificó Falta</option>
+                    <option value="FALTA - JUSTIFICACIÓN PENDIENTE">Falta - Justificación Pendiente</option>
+                    <option value="TARDANZA JUSTIFICADA">Tardanza Justificada</option>
+                    <option value="TARDANZA NO JUSTIFICADA">Tardanza No Justificada</option>
+                    <option value="JUSTIFICACIÓN NO VÁLIDA">Justificación No Válida</option>
+                </select>
+            </div>
+
+            <!-- ✅ NUEVO: FILTRO ¿CUMPLIÓ LA JORNADA? -->
+            <div class="filtro-group">
+                <label><i class="fas fa-clipboard-check"></i> ¿Cumplió la Jornada?</label>
+                <select id="filtroCumplioJornada">
+                    <option value="">-- Todos --</option>
+                    <option value="CUMPLIDA">Jornada Cumplida</option>
+                    <option value="NO_CUMPLIDA">Jornada No Cumplida</option>
+                    <option value="NA">Ninguna</option>
+                </select>
+            </div>
+
+            <div class="filtro-group">
+                <button class="btn-limpiar" id="btnLimpiarFiltros">
+                    <i class="fas fa-broom"></i> Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLA DE MARCACIONES -->
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="tablaMarcaciones">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-user"></i> Usuario</th>
+                            <th><i class="fas fa-id-card"></i> ID Control Horario</th>
+                            <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                            <th><i class="fas fa-sign-in-alt"></i> Ingreso Real</th>
+                            <th><i class="fas fa-sign-out-alt"></i> Salida Real</th>
+                            <th><i class="fas fa-utensils"></i> Ingreso Almuerzo</th>
+                            <th><i class="fas fa-running"></i> Salida Almuerzo</th>
+                            <th class="col-id-estado-marcacion"><i class="fas fa-hashtag"></i> ID Estado Marcación</th>
+                            <th><i class="fas fa-toggle-on"></i> Estado Marcación</th>
+                            <th class="col-id-estado-almuerzo-ingreso"><i class="fas fa-hashtag"></i> ID Estado Almuerzo
+                                Ingreso</th>
+                            <th><i class="fas fa-utensils"></i> Estado Almuerzo Ingreso</th>
+                            <th class="col-id-estado-almuerzo-salida"><i class="fas fa-hashtag"></i> ID Estado Almuerzo
+                                Salida</th>
+                            <th><i class="fas fa-utensils"></i> Estado Almuerzo Salida</th>
+                            <!-- ✅ NUEVO: Columna ¿Cumplió la Jornada? -->
+                            <th><i class="fas fa-clipboard-check"></i> ¿Cumplió la Jornada?</th>
+                            <th><i class="fas fa-comment"></i> OBS & Just.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMarcacionesBody">
+                        <tr>
+                            <td colspan="16" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Cargando marcaciones...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============================================ -->
+    <!-- MODAL: EDITAR OBSERVACIÓN                    -->
+    <!-- ============================================ -->
+    <div id="modalEditarObservacion" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="editObsTitulo"><i class="fas fa-edit"></i> Editar Observación</h3>
+                <button class="close-modal" id="closeEditObsBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editarObsForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+                    <input type="hidden" id="editObsIdMarcacion">
+                    <input type="hidden" id="editObsCampo">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label><i class="fas fa-hashtag"></i> ID Marcación</label>
+                            <input type="text" id="editObsIdDisplay" class="form-control" readonly disabled>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label><i class="fas fa-user"></i> Usuario</label>
+                            <input type="text" id="editObsUsuarioDisplay" class="form-control" readonly disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="editObsCampoLabel"><i class="fas fa-comment"></i> Observación</label>
+                        <textarea id="editObsTexto" rows="4" placeholder="Escriba la observación..."></textarea>
+                    </div>
+
+                    <div class="button-group"
+                        style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 15px; border-top: 2px solid #f0f0f0;">
+                        <button type="button" class="btn btn-warning" id="btnObsJustificacionNoValida"
+                            style="display:none;">
+                            <i class="fas fa-exclamation-triangle"></i> Justificación No Válida
+                        </button>
+
+                        <button type="button" class="btn btn-danger" id="btnObsNoJustificoFalta" style="display:none;">
+                            <i class="fas fa-times-circle"></i> NO JUSTIFICÓ FALTA
+                        </button>
+
+                        <button type="button" class="btn btn-success" id="btnObsAnularJustificacion"
+                            style="display:none;">
+                            <i class="fas fa-undo-alt"></i> Anular Justificación No Válida
+                        </button>
+
+                        <div id="btnVestimentaGroup" style="display:none; gap:10px;">
+                            <button type="button" class="btn btn-success" id="btnVestimentaCumplio">
+                                <i class="fas fa-check"></i> Cumplió
+                            </button>
+                            <button type="button" class="btn btn-danger" id="btnVestimentaNoCumplio">
+                                <i class="fas fa-times"></i> No Cumplió
+                            </button>
+                        </div>
+
+                        <!-- ✅ NUEVO: Botones de Jornada Incompleta -->
+                        <button type="button" class="btn btn-danger" id="btnJornadaNoJustificada" style="display:none;">
+                            <i class="fas fa-times-circle"></i> NO JUSTIFICÓ
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnCancelarEditObs">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: CONFIRMACIÓN                          -->
+    <!-- ============================================ -->
+    <div id="modalConfirmar" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Acción</h3>
+                <button class="close-modal" id="closeConfirmModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmarMensaje" style="margin-bottom: 20px; color: #1a1a2e;"></p>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="btnCancelarConfirmacion">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary" id="btnConfirmarAccion">
+                        <i class="fas fa-check"></i> Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: VER OBSERVACIÓN                       -->
+    <!-- ============================================ -->
+    <div id="modalObservacion" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-comment"></i> Observación Completa</h3>
+                <button class="close-modal" id="closeObservacionModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="observacionTexto"
+                    style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; color: #1a1a2e;"></p>
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-secondary" id="btnCerrarObservacion">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: DETALLE DE ASIGNACIÓN                 -->
+    <!-- ============================================ -->
+    <div id="modalDetalleAsignacion" class="modal">
+        <div class="modal-content detalle">
+            <div class="modal-header">
+                <h3><i class="fas fa-list"></i> Detalle de Asignación</h3>
+                <button class="close-modal" id="closeDetalleAsignacionBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container" style="max-height: 50vh; overflow-y: auto;">
+                    <table style="min-width: auto;">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-tag"></i> Campo</th>
+                                <th><i class="fas fa-info-circle"></i> Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detalleAsignacionBody">
+                            <tr>
+                                <td colspan="2" class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-secondary" id="btnCerrarDetalleAsignacion">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: VER EVIDENCIA (SELFIE)                -->
+    <!-- ============================================ -->
+    <div id="modalEvidencia" class="modal">
+        <div class="modal-content evidencia">
+            <div class="modal-header">
+                <h3 id="evidenciaTitulo"><i class="fas fa-camera"></i> Evidencia de Marcación</h3>
+                <button class="close-modal" id="closeEvidenciaModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="evidenciaImagenContainer">
+                    <div id="evidenciaImagenPlaceholder" style="color: #adb5bd; text-align: center; padding: 40px;">
+                        <i class="fas fa-image" style="font-size: 48px;"></i>
+                        <p style="margin-top: 10px;">No hay imagen disponible</p>
+                    </div>
+                    <img id="evidenciaImagen"
+                        style="max-width: 100%; max-height: 400px; border-radius: 8px; display: none;"
+                        alt="Evidencia" />
+                    <div id="evidenciaInfo"
+                        style="margin-top: 10px; font-size: 12px; color: #6c757d; width: 100%; text-align: center;">
+                    </div>
+                </div>
+
+                <div id="evidenciaMapaContainer">
+                    <div id="evidenciaMapaPlaceholder"
+                        style="color: #adb5bd; text-align: center; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 48px;"></i>
+                        <p style="margin-top: 10px;">No Requerido</p>
+                    </div>
+                    <div id="evidenciaMapa" style="width: 100%; height: 100%; min-height: 300px; display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCerrarEvidencia">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: CARGA DE EVIDENCIA                    -->
+    <!-- ============================================ -->
+    <div id="modalCargaEvidencia" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-body" style="padding: 30px;">
+                <div class="spinner"></div>
+                <h3 id="cargaEvidenciaTitulo" style="margin-top: 15px; color: #1a1a2e;">Cargando evidencia...</h3>
+                <p id="cargaEvidenciaMensaje" style="color: #6c757d;">Espere un momento</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: DETALLE DE OBSERVACIONES              -->
+    <!-- ============================================ -->
+    <div id="modalDetalleObservaciones" class="modal">
+        <div class="modal-content" style="max-width: 850px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-comment-dots"></i> Detalle de Observaciones y Justificaciones</h3>
+                <button class="close-modal" id="closeDetalleObsBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detalle-header">
+                    <span><strong>ID Marcación:</strong> <span id="detalleObsId">--</span></span>
+                    <span><strong>Usuario:</strong> <span id="detalleObsUsuario">--</span></span>
+                    <span><strong>Fecha:</strong> <span id="detalleObsFecha">--</span></span>
+                </div>
+
+                <!-- OBSERVACIÓN GENERAL -->
+                <div class="obs-item">
+                    <div class="obs-label">📝 Observación Ingreso</div>
+                    <div class="obs-content">
+                        <span id="obsGeneralTexto" class="obs-texto">--</span>
+                        <div class="obs-actions">
+                            <button class="btn-obs-edit" data-tipo="observacion" title="Editar observación">
+                                <i class="fas fa-edit"></i> Ver / Editar
+                            </button>
+                            <button class="btn-obs-evidence" data-tipo="observacion"
+                                title="Ver evidencia de tardanza o falta">
+                                <i class="fas fa-camera"></i> Ver Evidencia
+                            </button>
+                            <button class="btn-obs-upload-evidence" data-tipo="observacion"
+                                title="Agregar o actualizar evidencia de justificación">
+                                <i class="fas fa-upload"></i> Agregar Evidencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OBSERVACIÓN VESTIMENTA -->
+                <div class="obs-item">
+                    <div class="obs-label">👔 Vestimenta</div>
+                    <div class="obs-content">
+                        <span id="obsVestimentaTexto" class="obs-texto">--</span>
+                        <div class="obs-actions">
+                            <button class="btn-obs-edit" data-tipo="vestimenta"
+                                title="Editar observación de vestimenta">
+                                <i class="fas fa-edit"></i> Ver / Editar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OBSERVACIÓN INGRESO ALMUERZO -->
+                <div class="obs-item">
+                    <div class="obs-label">🍽️ Ingreso Almuerzo</div>
+                    <div class="obs-content">
+                        <span id="obsIngAlmuerzoTexto" class="obs-texto">--</span>
+                        <div class="obs-actions">
+                            <button class="btn-obs-edit" data-tipo="ingresoAlmuerzo"
+                                title="Editar observación de ingreso almuerzo">
+                                <i class="fas fa-edit"></i> Ver / Editar
+                            </button>
+                            <button class="btn-obs-evidence" data-tipo="ingresoAlmuerzo" title="Ver evidencia">
+                                <i class="fas fa-camera"></i> Ver Evidencia
+                            </button>
+                            <button class="btn-obs-upload-evidence" data-tipo="ingresoAlmuerzo"
+                                title="Agregar o actualizar evidencia de justificación">
+                                <i class="fas fa-upload"></i> Agregar Evidencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OBSERVACIÓN SALIDA ALMUERZO -->
+                <div class="obs-item">
+                    <div class="obs-label">🏃 Salida Almuerzo</div>
+                    <div class="obs-content">
+                        <span id="obsSalAlmuerzoTexto" class="obs-texto">--</span>
+                        <div class="obs-actions">
+                            <button class="btn-obs-edit" data-tipo="salidaAlmuerzo"
+                                title="Editar observación de salida almuerzo">
+                                <i class="fas fa-edit"></i> Ver / Editar
+                            </button>
+                            <button class="btn-obs-evidence" data-tipo="salidaAlmuerzo" title="Ver evidencia">
+                                <i class="fas fa-camera"></i> Ver Evidencia
+                            </button>
+                            <button class="btn-obs-upload-evidence" data-tipo="salidaAlmuerzo"
+                                title="Agregar o actualizar evidencia de justificación">
+                                <i class="fas fa-upload"></i> Agregar Evidencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ NUEVO: OBSERVACIÓN JORNADA COMPLETA -->
+                <div class="obs-item">
+                    <div class="obs-label">📋 ¿Cumplió Jornada?</div>
+                    <div class="obs-content">
+                        <span id="obsJornadaCompletaTexto" class="obs-texto">--</span>
+                        <div class="obs-actions">
+                            <button class="btn-obs-edit" data-tipo="jornadaCompleta"
+                                title="Ver / Editar observación de jornada completa">
+                                <i class="fas fa-edit"></i> Ver / Editar
+                            </button>
+                            <button class="btn-obs-evidence" data-tipo="jornadaCompleta"
+                                title="Ver evidencia de jornada incompleta">
+                                <i class="fas fa-camera"></i> Ver Evidencia
+                            </button>
+                            <button class="btn-obs-upload-evidence" data-tipo="jornadaCompleta"
+                                title="Agregar o actualizar evidencia de justificación">
+                                <i class="fas fa-upload"></i> Agregar Evidencia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCerrarDetalleObs">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: CARGAR EVIDENCIA DE JUSTIFICACIÓN     -->
+    <!-- ============================================ -->
+    <div id="modalCargarEvidenciaJustificacion" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h3 id="modalCargarEvidenciaTitulo"><i class="fas fa-upload"></i> Agregar Evidencia</h3>
+                <button class="close-modal" id="closeCargarEvidenciaBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                    <div>
+                        <label style="font-weight: 600; font-size: 12px; color: #6c757d;">ID Marcación</label>
+                        <p id="cargarEvidenciaId" style="font-size: 14px; font-weight: 700;">--</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 12px; color: #6c757d;">Usuario</label>
+                        <p id="cargarEvidenciaUsuario" style="font-size: 14px; font-weight: 700;">--</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 12px; color: #6c757d;">Fecha</label>
+                        <p id="cargarEvidenciaFecha" style="font-size: 14px; font-weight: 700;">--</p>
+                    </div>
+                    <div>
+                        <label style="font-weight: 600; font-size: 12px; color: #6c757d;">Tipo</label>
+                        <p id="cargarEvidenciaTipo" style="font-size: 14px; font-weight: 700;">--</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-paperclip"></i> Seleccionar archivo</label>
+                    <input type="file" id="inputCargarEvidencia" accept=".jpg,.jpeg,.png,.pdf"
+                        style="width: 100%; padding: 8px; border: 2px dashed #ddd; border-radius: 8px; cursor: pointer;">
+                    <small style="color: #6c757d;">Formatos permitidos: JPG, PNG, PDF (Máx 5MB)</small>
+                </div>
+
+                <div id="previewCargarEvidencia" style="display: none; margin-top: 10px;">
+                    <div id="previewCargarEvidenciaContainer"
+                        style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    </div>
+                </div>
+
+                <div id="estadoEvidenciaActual"
+                    style="margin-top: 15px; padding: 10px; background: #e9ecef; border-radius: 8px; display: none;">
+                    <p style="font-size: 13px; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-info-circle" style="color: #17a2b8;"></i>
+                        <span id="estadoEvidenciaActualTexto">Ya existe una evidencia para esta marcación.</span>
+                    </p>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-secondary" id="btnCancelarCargarEvidencia">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn btn-primary" id="btnGuardarCargarEvidencia" disabled>
+                        <i class="fas fa-save"></i> Guardar Evidencia
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: VER EVIDENCIA TARDANZA/FALTA/JORNADA  -->
+    <!-- ============================================ -->
+    <div id="modalEvidenciaTardanzaFalta" class="modal">
+        <div class="modal-content evidencia">
+            <div class="modal-header">
+                <h3 id="evidenciaTardanzaTitulo"><i class="fas fa-camera"></i> Evidencia de Justificación</h3>
+                <button class="close-modal" id="closeEvidenciaTardanzaBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="evidencia-info-header">
+                    <span><strong>ID Marcación:</strong> <span id="evidenciaTardanzaId">--</span></span>
+                    <span><strong>Usuario:</strong> <span id="evidenciaTardanzaUsuario">--</span></span>
+                    <span><strong>Fecha:</strong> <span id="evidenciaTardanzaFecha">--</span></span>
+                    <span><strong>Tipo:</strong> <span id="evidenciaTardanzaTipo" class="tipo-badge">--</span></span>
+                </div>
+
+                <div id="evidenciaTardanzaContainer">
+                    <div id="evidenciaTardanzaPlaceholder" class="evidencia-placeholder">
+                        <i class="fas fa-file-alt"></i>
+                        <p>No hay evidencia disponible</p>
+                    </div>
+
+                    <div id="evidenciaTardanzaImagenWrapper" style="display: none; width: 100%;">
+                        <img id="evidenciaTardanzaImagen"
+                            style="max-width: 100%; max-height: 500px; border-radius: 8px; display: none;"
+                            alt="Evidencia de justificación" />
+                    </div>
+
+                    <div id="evidenciaTardanzaPdfWrapper" style="display: none; width: 100%;">
+                        <div
+                            style="position: relative; width: 100%; padding-bottom: 75%; height: 0; overflow: hidden; border-radius: 8px; background: #f8f9fa; border: 1px solid #e8e8e8;">
+                            <iframe id="evidenciaTardanzaPdfPreview"
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none;"
+                                src="" allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                            <button id="btnDescargarPdf" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="evidenciaTardanzaInfo"
+                        style="margin-top: 10px; font-size: 12px; color: #6c757d; width: 100%; text-align: center;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCerrarEvidenciaTardanza">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODAL: VER TARDANZAS / DESCUENTOS            -->
+    <!-- ============================================ -->
+    <div id="modalTardanzas" class="modal">
+        <div class="modal-content" style="max-width: 1400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-clock"></i> Reporte de Tardanzas / Descuentos</h3>
+                <button class="close-modal" id="closeTardanzasModalBtn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div
+                    style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                    <div class="filtro-group" style="flex: 1; min-width: 150px;">
+                        <label><i class="fas fa-user"></i> Usuario</label>
+                        <select id="filtroTardanzaUsuario"
+                            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd;">
+                            <option value="">-- Todos --</option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-group" style="flex: 1; min-width: 150px;">
+                        <label><i class="fas fa-building"></i> Área</label>
+                        <select id="filtroTardanzaArea"
+                            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd;">
+                            <option value="">-- Todas --</option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-group" style="flex: 1; min-width: 130px;">
+                        <label><i class="fas fa-calendar-alt"></i> Mes</label>
+                        <select id="filtroTardanzaMes"
+                            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd;">
+                            <option value="">-- Mes --</option>
+                            <option value="01">Enero</option>
+                            <option value="02">Febrero</option>
+                            <option value="03">Marzo</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Mayo</option>
+                            <option value="06">Junio</option>
+                            <option value="07">Julio</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-group" style="flex: 1; min-width: 120px;">
+                        <label><i class="fas fa-calendar"></i> Año</label>
+                        <select id="filtroTardanzaAnio"
+                            style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd;">
+                            <option value="">-- Año --</option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-group" style="flex: 0 0 auto;">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" id="btnFiltrarTardanzas" style="padding: 8px 20px;">
+                            <i class="fas fa-filter"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="totalesMensuales"
+                    style="display: flex; justify-content: space-between; align-items: stretch; margin-top: 20px; padding: 15px 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; border-left: 5px solid #CC0000; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-calendar-alt" style="font-size: 24px; color: #CC0000;"></i>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d; font-weight: 600;">TOTAL MINUTOS MENSUALES
+                                </div>
+                                <div id="totalMinutosMensual"
+                                    style="font-size: 24px; font-weight: 700; color: #1a1a2e;">---</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-money-bill-wave" style="font-size: 24px; color: #dc3545;"></i>
+                            <div>
+                                <div style="font-size: 12px; color: #6c757d; font-weight: 600;">TOTAL DESCUENTO APLICADO
+                                </div>
+                                <div id="totalDescuentoAplicado"
+                                    style="font-size: 24px; font-weight: 700; color: #dc3545;">---</div>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; border-left: 2px solid #dee2e6; padding-left: 20px;">
+                            <i class="fas fa-file-invoice" style="font-size: 22px; color: #6c757d;"></i>
+                            <div>
+                                <div style="font-size: 11px; color: #6c757d; font-weight: 600;">TOTAL DESCUENTO BASE
+                                </div>
+                                <div id="totalDescuentoBase" style="font-size: 20px; font-weight: 600; color: #6c757d;">
+                                    ---</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        <button id="btnExportarDetallado" class="btn"
+                            style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); color: white; padding: 10px 20px; box-shadow: 0 3px 10px rgba(40, 167, 69, 0.25);">
+                            <i class="fas fa-file-excel"></i> Exportar Detallado
+                        </button>
+                        <button id="btnExportarResumen" class="btn"
+                            style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 10px 20px; box-shadow: 0 3px 10px rgba(23, 162, 184, 0.25);">
+                            <i class="fas fa-file-excel"></i> Exportar Resumen
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-wrapper" style="max-height: 55vh;">
+                        <table id="tablaTardanzas" style="min-width: 2000px; font-size: 11px;">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-hashtag"></i> ID</th>
+                                    <th><i class="fas fa-user"></i> Usuario</th>
+                                    <th><i class="fas fa-building"></i> Área</th>
+                                    <th><i class="fas fa-toggle-on"></i> Estado Usuario</th>
+                                    <th><i class="fas fa-calendar-day"></i> Fecha</th>
+                                    <th><i class="fas fa-sign-in-alt"></i> Ingreso Real</th>
+                                    <th><i class="fas fa-clock"></i> Tardanza Ingreso</th>
+                                    <th><i class="fas fa-utensils"></i> Ing. Almuerzo Real</th>
+                                    <th><i class="fas fa-running"></i> Sal. Almuerzo Real</th>
+                                    <th><i class="fas fa-clock"></i> Tardanza Sal. Almuerzo</th>
+                                    <th><i class="fas fa-calendar-check"></i> Ingreso Asignado</th>
+                                    <th><i class="fas fa-calendar-check"></i> Salida Asignado</th>
+                                    <th><i class="fas fa-calendar-check"></i> Ing. Al. Asignado</th>
+                                    <th><i class="fas fa-calendar-check"></i> Sal. Al. Asignado</th>
+                                    <th><i class="fas fa-calculator"></i> Total Min. Tardanza</th>
+                                    <th><i class="fas fa-calculator"></i> Total Min. a Aplicar</th>
+                                    <th><i class="fas fa-clock"></i> Horas Prog. Semanal</th>
+                                    <th><i class="fas fa-money-bill-wave"></i> Sueldo</th>
+                                    <th><i class="fas fa-dollar-sign"></i> Pago x Hora</th>
+                                    <th><i class="fas fa-dollar-sign"></i> Pago x Minuto</th>
+                                    <th><i class="fas fa-info-circle"></i> Motivo Desc. Tardanza</th>
+                                    <th><i class="fas fa-minus-circle"></i> Desc. Tardanza</th>
+                                    <th><i class="fas fa-info-circle"></i> Motivo Des. Adic. Almuerzo</th>
+                                    <th><i class="fas fa-minus-circle"></i> Des. Adic. Almuerzo</th>
+                                    <th><i class="fas fa-calculator"></i> Total Descuento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaTardanzasBody">
+                                <tr>
+                                    <td colspan="25" class="loading">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        Cargando datos...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="paginacionTardanzas" class="paginacion-container"
+                    style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px 15px; background: white; border-radius: 10px; flex-wrap: wrap; gap: 10px;">
+                    <div class="paginacion-info">
+                        Mostrando <span id="inicioTardanzas">0</span> - <span id="finTardanzas">0</span> de <span
+                            id="totalTardanzas">0</span> registros
+                    </div>
+                    <div class="paginacion-buttons">
+                        <button class="btn-paginacion" id="btnTardanzasPrimera" disabled>⏮</button>
+                        <button class="btn-paginacion" id="btnTardanzasAnterior" disabled>◀</button>
+                        <span class="paginacion-pagina" id="paginaTardanzasInfo">Página 1 de 1</span>
+                        <button class="btn-paginacion" id="btnTardanzasSiguiente" disabled>▶</button>
+                        <button class="btn-paginacion" id="btnTardanzasUltima" disabled>⏭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPTS — orden correcto + defer             -->
+    <!-- ============================================ -->
+
+    <!-- 1) Utilidades -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+
+    <!-- 2) Services -->
+    <script defer src="../services/Auth_Services.js"></script>
+    <script defer src="../services/Marcacion_Services.js"></script>
+
+    <!-- 3) Controller -->
+    <script defer src="../controllers/Marcaciones_Controller.js"></script>
+
+    <!-- 4) Bootstrap (instancia todo) -->
+    <script defer src="../../public/bootstrap/Marcaciones_Bootstrap.js"></script>
+
+    <!-- 5) Bloqueo (opcional) -->
+    <script defer src="../../public/utils/Bloqueo.js"></script>
+</body>
+
+</html>

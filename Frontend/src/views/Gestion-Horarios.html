@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencias - Gestión de Horarios</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="../css/Horarios.css">
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div>
+                <h1>Control de Asistencias</h1>
+                <div class="subtitle"><i class="fas fa-clock"></i> Gestión de Horarios</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Administrador</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Administrador</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn"><i class="fas fa-home"></i> Menú Principal</button>
+                <button class="dropdown-item" id="perfilBtn"><i class="fas fa-user-cog"></i> Mi Perfil</button>
+                <button class="dropdown-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar
+                    Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-container">
+        <div class="actions-bar">
+            <h2><i class="fas fa-calendar-alt"></i> Gestión de <span>Horarios</span></h2>
+            <div class="actions-group">
+                <div class="fuente-selector">
+                    <label><i class="fas fa-filter"></i> Tipo:</label>
+                    <select id="tipoHorarioFiltro">
+                        <option value="todos">Todos</option>
+                        <option value="presencial">Presencial</option>
+                        <option value="virtual">Virtual</option>
+                    </select>
+                </div>
+                <button class="btn btn-restore" id="btnRestaurarHorarios">
+                    <i class="fas fa-trash-restore"></i> Restaurar Horarios
+                </button>
+                <button class="btn btn-agregar" id="btnAgregar">
+                    <i class="fas fa-plus"></i> Agregar Horario
+                </button>
+                <button class="btn btn-exportar" id="btnExportarExcel">
+                    <i class="fas fa-file-excel"></i> Exportar Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="tablaHorarios">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-tag"></i> Descripción</th>
+                            <th><i class="fas fa-laptop"></i> Tipo</th>
+                            <th><i class="fas fa-clock"></i> Horas</th>
+                            <th><i class="fas fa-hourglass-half"></i> Minutos</th>
+                            <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                            <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                            <th><i class="fas fa-utensils"></i> Ing. Almuerzo</th>
+                            <th><i class="fas fa-utensils"></i> Sal. Almuerzo</th>
+                            <th><i class="fas fa-toggle-on"></i> Estado</th>
+                            <th><i class="fas fa-user-plus"></i> Usuario Creación</th>
+                            <th><i class="fas fa-calendar-plus"></i> Fecha Creación</th>
+                            <th><i class="fas fa-user-edit"></i> Usuario Modif.</th>
+                            <th><i class="fas fa-calendar-check"></i> Fecha Modif.</th>
+                            <th><i class="fas fa-cogs"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHorariosBody">
+                        <tr>
+                            <td colspan="13" class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando horarios...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL AGREGAR/EDITAR -->
+    <div id="modalHorario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-plus-circle"></i> Agregar Horario</h3>
+                <button class="close-modal" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="horarioForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+                    <input type="hidden" id="horarioId" value="">
+
+                    <div class="form-group">
+                        <label for="descripcion"><i class="fas fa-tag"></i> Descripción</label>
+                        <input type="text" id="descripcion" placeholder="Ej: Turno Mañana, Turno Tarde" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipoHorario"><i class="fas fa-laptop"></i> Tipo de Horario</label>
+                        <select id="tipoHorario" required>
+                            <option value="PRESENCIAL">PRESENCIAL</option>
+                            <option value="VIRTUAL">VIRTUAL</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tiempoHoras"><i class="fas fa-clock"></i> Horas</label>
+                            <input type="number" id="tiempoHoras" min="0" max="24" value="0">
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Duración en horas (se sincroniza
+                                con minutos)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tiempoMinutos"><i class="fas fa-hourglass-half"></i> Minutos</label>
+                            <input type="number" id="tiempoMinutos" min="0" value="0">
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Duración en minutos (total)</div>
+                        </div>
+
+                        <div id="avisoDuracionCorta"
+                            style="display:none; background:#fff3cd; color:#856404; padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:15px; border-left:4px solid #ffc107;">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="avisoDuracionCortaTexto"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="esAleatorio" style="width:18px; height:18px; accent-color:#CC0000;">
+                        <label for="esAleatorio" style="margin:0; cursor:pointer;">
+                            <i class="fas fa-random"></i> Horario aleatorio (las horas se definirán al asignar)
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="horaIngreso"><i class="fas fa-sign-in-alt"></i> Hora de Ingreso</label>
+                            <input type="time" id="horaIngreso" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="horaSalida"><i class="fas fa-sign-out-alt"></i> Hora de Salida</label>
+                            <input type="time" id="horaSalida" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="tieneAlmuerzo"
+                            style="width:18px; height:18px; accent-color:#CC0000;">
+                        <label for="tieneAlmuerzo" style="margin:0; cursor:pointer;">
+                            <i class="fas fa-utensils"></i> Este horario tiene almuerzo definido
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="horaIngAlmuerzo"><i class="fas fa-utensils"></i> Ingreso Almuerzo</label>
+                            <input type="time" id="horaIngAlmuerzo" disabled>
+                            <div class="help-text"><i class="fas fa-info-circle"></i> El almuerzo debe ser de 60 minutos
+                                exactos</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="horaSalAlmuerzo"><i class="fas fa-utensils"></i> Salida Almuerzo</label>
+                            <input type="time" id="horaSalAlmuerzo" disabled>
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Diferencia exacta: 60 min</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="idEstado"><i class="fas fa-toggle-on"></i> Estado</label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <select id="idEstado" style="flex:1;" required>
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                            <span id="estadoDescripcion" class="estado-info"></span>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnCancelar"><i class="fas fa-times"></i>
+                            Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardar"><i class="fas fa-save"></i>
+                            Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR ELIMINAR -->
+    <div id="modalConfirmar" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h3>
+                <button class="close-modal" id="closeConfirmModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmarMensajeHorario" style="margin-bottom: 15px; color:#1a1a2e;"></p>
+                <div
+                    style="background:#fff3cd; padding:16px; border-radius:12px; margin-bottom:20px; border-left:4px solid #ffc107;">
+                    <p style="color:#856404; font-size:13px; margin-bottom:8px;">
+                        <strong><i class="fas fa-exclamation-circle"></i> ADVERTENCIA:</strong>
+                    </p>
+                    <p style="color:#856404; font-size:13px;">
+                        Se eliminarán en cascada las asignaciones, marcaciones, evidencias y justificaciones
+                        relacionadas.
+                        Podrá restaurarlo después.
+                    </p>
+                </div>
+                <div style="text-align:center; margin-bottom:20px;">
+                    <p style="font-size:14px; color:#6c757d;">Eliminación automática en:</p>
+                    <div id="countdownTimer" style="font-size:24px; font-weight:bold; color:#dc3545; margin-top:10px;">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="btnCancelarEliminar"><i class="fas fa-times"></i>
+                        Cancelar</button>
+                    <button class="btn btn-danger" id="btnConfirmarEliminar"><i class="fas fa-trash"></i> Eliminar
+                        ahora</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RESTAURAR -->
+    <div id="modalRestaurarHorarios" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash-restore"></i> Restaurar Horarios</h3>
+                <button class="close-modal" id="closeRestaurarHorariosModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 10px; color:#6c757d; font-size:14px;">
+                    <i class="fas fa-info-circle" style="color:#CC0000;"></i>
+                    Horarios eliminados que pueden ser restaurados.
+                </p>
+
+                <div class="table-scroll-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> ID</th>
+                                <th><i class="fas fa-tag"></i> Descripción</th>
+                                <th><i class="fas fa-laptop"></i> Tipo</th>
+                                <th><i class="fas fa-clock"></i> Horas</th>
+                                <th><i class="fas fa-hourglass-half"></i> Min.</th>
+                                <th><i class="fas fa-sign-in-alt"></i> Ingreso</th>
+                                <th><i class="fas fa-sign-out-alt"></i> Salida</th>
+                                <th><i class="fas fa-utensils"></i> Ing. Alm.</th>
+                                <th><i class="fas fa-utensils"></i> Sal. Alm.</th>
+                                <th><i class="fas fa-cogs"></i> Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHorariosEliminadosBody">
+                            <tr>
+                                <td colspan="10" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Cargando...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ✅ NUEVO: Controles de paginación para eliminados -->
+                <div id="paginacionEliminadosContainer" class="paginacion-container"
+                    style="display: none; margin-top: 15px;">
+                    <div class="paginacion-info">
+                        Mostrando <span id="inicioEliminados">0</span> - <span id="finEliminados">0</span>
+                        de <span id="totalEliminados">0</span> registros
+                    </div>
+                    <div class="paginacion-buttons">
+                        <button class="btn-paginacion" id="btnPrimeraEliminados" disabled>⏮ Primera</button>
+                        <button class="btn-paginacion" id="btnAnteriorEliminados" disabled>◀ Anterior</button>
+                        <span class="paginacion-pagina" id="paginaActualEliminados">Página 1 de 1</span>
+                        <button class="btn-paginacion" id="btnSiguienteEliminados" disabled>Siguiente ▶</button>
+                        <button class="btn-paginacion" id="btnUltimaEliminados" disabled>Última ⏭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR RESTAURAR -->
+    <div id="modalRestaurarHorarioConfirmar" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-trash-restore"></i> Confirmar Restauración</h3>
+                <button class="close-modal" id="closeRestaurarHorarioConfirmModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="restaurarHorarioMensaje" style="margin-bottom:15px; color:#1a1a2e;"></p>
+                <div
+                    style="background:#d4edda; padding:16px; border-radius:12px; margin-bottom:15px; border-left:4px solid #28a745;">
+                    <p style="color:#155724; font-size:13px;">
+                        <strong><i class="fas fa-check-circle"></i> Al restaurar:</strong>
+                        El horario volverá a estar activo y se restaurarán en cascada las asignaciones y marcaciones
+                        relacionadas.
+                    </p>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="btnCancelarRestaurarHorario"><i class="fas fa-times"></i>
+                        Cancelar</button>
+                    <button class="btn btn-success" id="btnConfirmarRestaurarHorario"><i
+                            class="fas fa-trash-restore"></i> Restaurar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+
+    <script defer src="../services/Auth_Services.js"></script>
+    <script defer src="../services/Horario_Services.js"></script>
+
+    <script defer src="../controllers/Horario_Controller.js"></script>
+    <script defer src="../../public/bootstrap/Horario_Bootstrap.js"></script>
+
+    <script defer src="../../public/utils/Bloqueo.js"></script>
+</body>
+
+</html>

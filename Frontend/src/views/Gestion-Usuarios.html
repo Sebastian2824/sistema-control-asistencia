@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Asistencias - Gestión de Usuarios</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="../css/Usuario.css">
+</head>
+
+<body>
+    <!-- HEADER CORPORATIVO -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon"><i class="fas fa-users-cog"></i></div>
+            <div>
+                <h1>Control de Asistencias</h1>
+                <div class="subtitle"><i class="fas fa-users"></i> Gestión de Usuarios</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Administrador</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Administrador</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn"><i class="fas fa-home"></i> Menú Principal</button>
+                <button class="dropdown-item" id="perfilBtn"><i class="fas fa-user-cog"></i> Mi Perfil</button>
+                <button class="dropdown-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar
+                    Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-container">
+        <div class="actions-bar">
+            <h2><i class="fas fa-users"></i> Gestión de <span>Usuarios</span></h2>
+            <div class="actions-group">
+                <div class="buscador-usuarios">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscadorUsuarios"
+                        placeholder="Buscar por nombre, apellido, usuario o correo..." autocomplete="off">
+                    <button type="button" class="btn-limpiar-busqueda" id="btnLimpiarBusqueda" title="Limpiar búsqueda"
+                        style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="filtro-rol">
+                    <label><i class="fas fa-id-badge"></i> Filtrar:</label>
+                    <select id="filtroRol">
+                        <option value="todos">Todos los roles</option>
+                        <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+                        <option value="COLABORADOR - COUNTER">COLABORADOR - COUNTER</option>
+                        <option value="COLABORADOR - MAYORISTA">COLABORADOR - MAYORISTA</option>
+                    </select>
+                </div>
+                <button class="btn btn-eliminados" id="btnVerEliminados">
+                    <i class="fas fa-trash-alt"></i> Desactivados
+                </button>
+                <button class="btn btn-agregar" id="btnAgregar">
+                    <i class="fas fa-plus"></i> Agregar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table id="tablaUsuarios">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-user"></i> Nombres</th>
+                            <th><i class="fas fa-user-friends"></i> Apellidos</th>
+                            <th><i class="fas fa-at"></i> Usuario</th>
+                            <th><i class="fas fa-id-badge"></i> Rol</th>
+                            <th><i class="fas fa-envelope"></i> Correo</th>
+                            <th><i class="fas fa-lock"></i> Contraseña</th>
+                            <th><i class="fas fa-cogs"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaUsuariosBody">
+                        <tr>
+                            <td colspan="8" class="loading"><i class="fas fa-spinner"></i> Cargando usuarios...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: REGISTRO DE USUARIO -->
+    <div id="modalRegistro" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h3>
+                <button class="close-modal" id="closeRegistroModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="registroForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+
+                    <h4 class="section-title"><i class="fas fa-address-card"></i> Datos Personales</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg_nombres"><i class="fas fa-user"></i> Nombres *</label>
+                            <input type="text" id="reg_nombres" name="nombres" required
+                                placeholder="Ingrese los nombres">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg_apellidos"><i class="fas fa-user-friends"></i> Apellidos *</label>
+                            <input type="text" id="reg_apellidos" name="apellidos" required
+                                placeholder="Ingrese los apellidos">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg_login"><i class="fas fa-at"></i> Nombre de Usuario *</label>
+                            <input type="text" id="reg_login" name="login" required
+                                placeholder="Se genera automáticamente" readonly>
+                            <div class="help-text"><i class="fas fa-magic"></i> Se genera con la 1ra letra del nombre +
+                                4 letras del apellido</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg_email"><i class="fas fa-envelope"></i> Correo Corporativo *</label>
+                            <input type="email" id="reg_email" name="email" required
+                                placeholder="ejemplo@peruroutes.com" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg_email_personal"><i class="fas fa-envelope-open"></i> Email Personal</label>
+                            <input type="email" id="reg_email_personal" name="emailPersonal"
+                                placeholder="ejemplo@gmail.com" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg_password"><i class="fas fa-lock"></i> Contraseña *</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="reg_password" name="password"
+                                    placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+                                <button type="button" class="toggle-password" data-target="reg_password"
+                                    aria-label="Mostrar contraseña">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Mínimo 6 caracteres</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg_telefono_corp"><i class="fas fa-phone"></i> Teléfono Corporativo</label>
+                            <input type="number" id="reg_telefono_corp" name="telefonoCorporativo"
+                                placeholder="Ej: 987654321" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg_telefono_pers"><i class="fas fa-mobile-alt"></i> Teléfono Personal</label>
+                            <input type="number" id="reg_telefono_pers" name="telefonoPersonal"
+                                placeholder="Ej: 987654321" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg_direccion_general"><i class="fas fa-map-marked-alt"></i> Dirección
+                            General</label>
+                        <input type="text" id="reg_direccion_general" name="direccionGeneral"
+                            placeholder="Ej: Lima, Perú">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg_direccion_especifica"><i class="fas fa-home"></i> Dirección Específica</label>
+                        <input type="text" id="reg_direccion_especifica" name="direccionEspecifica"
+                            placeholder="Calle, número, urbanización, etc.">
+                    </div>
+
+                    <h4 class="section-title"><i class="fas fa-building"></i> Datos Organizacionales</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg_sucursal"><i class="fas fa-store"></i> Sucursal *</label>
+                            <select id="reg_sucursal" required>
+                                <option value="">Seleccione Sucursal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg_area"><i class="fas fa-folder"></i> Área *</label>
+                            <select id="reg_area" required>
+                                <option value="">Seleccione Área</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg_rol"><i class="fas fa-id-badge"></i> Rol *</label>
+                            <select id="reg_rol" required>
+                                <option value="">Seleccione Rol</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg_estado"><i class="fas fa-toggle-on"></i> Estado *</label>
+                            <select id="reg_estado" required disabled>
+                                <option value="1" selected>1 - Activo</option>
+                                <option value="2">2 - Eliminado</option>
+                            </select>
+                            <div class="help-text"><i class="fas fa-lock"></i> Bloqueado</div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnCancelarRegistro">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardarRegistro">
+                            <i class="fas fa-save"></i> Registrar Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR USUARIO -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Editar Usuario</h3>
+                <button class="close-modal" id="closeEditarModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editarForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+                    <input type="hidden" id="edit_usuarioId" value="">
+
+                    <h4 class="section-title"><i class="fas fa-address-card"></i> Datos Personales</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_nombres"><i class="fas fa-user"></i> Nombres *</label>
+                            <input type="text" id="edit_nombres" required placeholder="Nombres">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_apellidos"><i class="fas fa-user-friends"></i> Apellidos *</label>
+                            <input type="text" id="edit_apellidos" required placeholder="Apellidos">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_nombreUsuario"><i class="fas fa-at"></i> Nombre de Usuario *</label>
+                            <input type="text" id="edit_nombreUsuario" required placeholder="Ej: jperez" disabled>
+                            <div class="help-text"><i class="fas fa-lock"></i> El nombre de usuario no se puede
+                                modificar</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_correo"><i class="fas fa-envelope"></i> Correo Corporativo *</label>
+                            <input type="email" id="edit_correo" required placeholder="ejemplo@peruroutes.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_email_personal"><i class="fas fa-envelope-open"></i> Email Personal</label>
+                            <input type="email" id="edit_email_personal" placeholder="ejemplo@gmail.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_contraseña"><i class="fas fa-lock"></i> Nueva Contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="edit_contraseña"
+                                    placeholder="Dejar en blanco para mantener la actual" autocomplete="new-password">
+                                <button type="button" class="toggle-password" data-target="edit_contraseña"
+                                    aria-label="Mostrar contraseña">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="help-text"><i class="fas fa-info-circle"></i> Dejar en blanco para mantener la
+                                contraseña actual</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_telefono_corp"><i class="fas fa-phone"></i> Teléfono Corporativo</label>
+                            <input type="number" id="edit_telefono_corp" placeholder="Ej: 987654321" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_telefono_pers"><i class="fas fa-mobile-alt"></i> Teléfono Personal</label>
+                            <input type="number" id="edit_telefono_pers" placeholder="Ej: 987654321" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_direccion_general"><i class="fas fa-map-marked-alt"></i> Dirección
+                            General</label>
+                        <input type="text" id="edit_direccion_general" placeholder="Ej: Lima, Perú">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_direccion_especifica"><i class="fas fa-home"></i> Dirección Específica</label>
+                        <input type="text" id="edit_direccion_especifica"
+                            placeholder="Calle, número, urbanización, etc.">
+                    </div>
+
+                    <h4 class="section-title"><i class="fas fa-building"></i> Datos Organizacionales</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_sucursal"><i class="fas fa-store"></i> Sucursal *</label>
+                            <select id="edit_sucursal" required>
+                                <option value="">Seleccione Sucursal</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_area"><i class="fas fa-folder"></i> Área *</label>
+                            <select id="edit_area" required>
+                                <option value="">Seleccione Área</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit_rol"><i class="fas fa-id-badge"></i> Rol *</label>
+                            <select id="edit_rol" required>
+                                <option value="">Seleccione Rol</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_estado"><i class="fas fa-toggle-on"></i> Estado *</label>
+                            <select id="edit_estado" required disabled>
+                                <option value="1">1 - Activo</option>
+                                <option value="2">2 - Eliminado</option>
+                            </select>
+                            <div class="help-text"><i class="fas fa-lock"></i> Bloqueado</div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="btnCancelarEditar">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="btnGuardarEditar">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR ELIMINACIÓN / DESACTIVACION-->
+<div id="modalConfirmar" class="modal">
+    <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Desactivación</h3>
+            <button class="close-modal" id="closeConfirmModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirmarMensajeUsuario" style="margin-bottom: 20px; color:#1a1a2e; font-size:15px;"></p>
+
+            <div style="background:#fff3cd; padding:16px; border-radius:12px; margin-bottom:24px; border-left:4px solid #ffc107;">
+                <p style="color:#856404; font-size:13px; margin-bottom:10px;">
+                    <strong><i class="fas fa-exclamation-circle"></i> ADVERTENCIA:</strong>
+                </p>
+                <p style="color:#856404; font-size:13px; margin-bottom:8px;">
+                    Al desactivarlo no tendra acceso al sistema y no estara disponible la consulta o visualización de:
+                </p>
+                <ul style="color:#856404; font-size:13px; margin-left:20px; margin-bottom:10px;">
+                    <li><strong>Asignaciones</strong> del usuario</li>
+                    <li><strong>Marcaciones</strong> relacionadas</li>
+                    <li><strong>Evidencias</strong> de asistencia</li>
+                    <li><strong>Justificaciones</strong></li>
+                    <li><strong>Observaciones</strong></li>
+                </ul>
+                <p style="color:#dc3545; font-size:13px; margin-top:10px;">
+                    <strong><i class="fas fa-undo"></i> Podrá activarlo desde "Desactivados".</strong>
+                </p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" id="btnCancelarEliminar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn btn-danger" id="btnConfirmarEliminar">
+                    <i class="fas fa-user-slash"></i> Desactivar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- MODAL: USUARIOS ELIMINADOS / DESACTIVADOS-->
+<div id="modalEliminados" class="modal">
+    <div class="modal-content large">
+        <div class="modal-header">
+            <h3><i class="fas fa-trash-alt"></i> Usuarios Desactivados</h3>
+            <button class="close-modal" id="closeEliminadosModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom: 15px; color: #6c757d;">
+                <i class="fas fa-info-circle" style="color: #CC0000;"></i>
+                Usuarios desactivados que pueden ser activados:
+            </p>
+
+            <div class="table-eliminados">
+                <table id="tablaEliminados">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-user"></i> Nombres</th>
+                            <th><i class="fas fa-user-friends"></i> Apellidos</th>
+                            <th><i class="fas fa-at"></i> Usuario</th>
+                            <th><i class="fas fa-envelope"></i> Correo</th>
+                            <th><i class="fas fa-cogs"></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaEliminadosBody">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner"></i> Cargando...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Controles de paginación para eliminados -->
+            <div id="paginacionEliminadosContainer" class="paginacion-container" style="display: none; margin-top: 15px;">
+                <div class="paginacion-info">
+                    Mostrando <span id="inicioEliminados">0</span> - <span id="finEliminados">0</span>
+                    de <span id="totalEliminados">0</span> registros
+                </div>
+                <div class="paginacion-buttons">
+                    <button class="btn-paginacion" id="btnPrimeraEliminados" disabled>⏮ Primera</button>
+                    <button class="btn-paginacion" id="btnAnteriorEliminados" disabled>◀ Anterior</button>
+                    <span class="paginacion-pagina" id="paginaActualEliminados">Página 1 de 1</span>
+                    <button class="btn-paginacion" id="btnSiguienteEliminados" disabled>Siguiente ▶</button>
+                    <button class="btn-paginacion" id="btnUltimaEliminados" disabled>Última ⏭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- MODAL: CONFIRMAR RESTAURAR -->
+<div id="modalRestaurar" class="modal">
+    <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-undo"></i> Confirmar Activación</h3>
+            <button class="close-modal" id="closeRestaurarModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="restaurarMensajeUsuario" style="margin-bottom: 20px; color:#1a1a2e; font-size:15px;"></p>
+
+            <div style="background:#d4edda; padding:16px; border-radius:12px; margin-bottom:24px; border-left:4px solid #28a745;">
+                <p style="color:#155724; font-size:13px; margin-bottom:10px;">
+                    <strong><i class="fas fa-check-circle"></i> Al activarlo:</strong>
+                </p>
+                <ul style="color:#155724; font-size:13px; margin-left:20px; margin-bottom:10px;">
+                    <li>Se restaurarán sus <strong>asignaciones</strong></li>
+                    <li>Se restaurarán sus <strong>marcaciones</strong> y <strong>evidencias</strong></li>
+                    <li>Se restaurarán sus <strong>justificaciones</strong></li>
+                    <li>Se restaurarán sus <strong>observaciones</strong></li>
+                </ul>
+                <p style="color:#155724; font-size:13px; margin-top:10px;">
+                    <strong><i class="fas fa-info-circle"></i> Solo se restaurarán asignaciones cuyo horario también esté activo.</strong>
+                </p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" id="btnCancelarRestaurar">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn btn-success" id="btnConfirmarRestaurar">
+                    <i class="fas fa-undo"></i> Activarlo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- MODAL: DETALLES DEL USUARIO -->
+    <div id="modalDetalles" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-circle"></i> Detalles del Usuario</h3>
+                <button class="close-modal" id="closeDetallesModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Columna Izquierda -->
+                    <div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-user"></i> Nombres:</label>
+                            <span id="detalleNombres">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-user-friends"></i> Apellidos:</label>
+                            <span id="detalleApellidos">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-at"></i> Usuario:</label>
+                            <span id="detalleUsuario">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-envelope"></i> Correo Corporativo:</label>
+                            <span id="detalleCorreo">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-envelope-open"></i> Email Personal:</label>
+                            <span id="detalleEmailPersonal">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-id-badge"></i> Rol:</label>
+                            <span id="detalleRol">-</span>
+                        </div>
+                    </div>
+                    <!-- Columna Derecha -->
+                    <div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-store"></i> Sucursal:</label>
+                            <span id="detalleSucursal">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-folder"></i> Área:</label>
+                            <span id="detalleArea">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-phone"></i> Teléfono Corporativo:</label>
+                            <span id="detalleTelefonoCorp">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-mobile-alt"></i> Teléfono Personal:</label>
+                            <span id="detalleTelefonoPers">-</span>
+                        </div>
+                        <div class="detalle-item">
+                            <label><i class="fas fa-toggle-on"></i> Estado:</label>
+                            <span id="detalleEstado">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="border-top: 2px solid #f0f0f0; padding-top: 20px; margin-top: 20px;">
+                    <h4 style="color: #CC0000; font-size: 15px; font-weight: 700; margin-bottom: 15px;">
+                        <i class="fas fa-map-marker-alt"></i> Ubicación
+                    </h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="detalle-item" style="border-left-color: #28a745;">
+                            <label><i class="fas fa-map"></i> Dirección General:</label>
+                            <span id="detalleDireccionGeneral">-</span>
+                        </div>
+                        <div class="detalle-item" style="border-left-color: #17a2b8;">
+                            <label><i class="fas fa-home"></i> Dirección Específica:</label>
+                            <span id="detalleDireccionEspecifica">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCerrarDetalles">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CARGA -->
+    <div id="modalCarga" class="modal" style="z-index: 9999;">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <div class="modal-header" style="justify-content: center;">
+                <h3 style="font-size: 18px;"><i class="fas fa-spinner fa-spin"></i> Procesando...</h3>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+                <div style="margin-bottom: 20px;">
+                    <i class="fas fa-sync-alt fa-spin" style="font-size: 48px; color: #CC0000;"></i>
+                </div>
+                <div id="cargaMensaje" style="font-size: 16px; color: #1a1a2e; font-weight: 500; margin-bottom: 15px;">
+                    Cargando datos...
+                </div>
+                <div class="progreso-container">
+                    <div id="cargaProgreso" class="progreso-bar"></div>
+                </div>
+                <div id="cargaDetalle" style="font-size: 12px; color: #6c757d; margin-top: 10px;">
+                    Por favor espere...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         SCRIPTS — orden correcto + defer
+         ============================================ -->
+
+    <!-- 1) Utilidades -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+    <script defer src="../../public/utils/Password_Encryption.js"></script>
+
+    <!-- 2) Services -->
+    <script defer src="../services/Auth_Services.js"></script>
+    <script defer src="../services/Usuario_Services.js"></script>
+
+    <!-- 3) Controller -->
+    <script defer src="../controllers/Usuario_Controller.js"></script>
+
+    <!-- 4) Bootstrap -->
+    <script defer src="../../public/bootstrap/Usuario_Bootstrap.js"></script>
+
+    <!-- 5) Bloqueo (opcional) -->
+    <script defer src="../../public/utils/Bloqueo.js"></script>
+</body>
+
+</html>

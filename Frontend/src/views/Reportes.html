@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Asistencia</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF + html2canvas (para exportación) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- CSS del módulo -->
+    <link rel="stylesheet" href="../css/Reportes.css">
+</head>
+
+<body>
+    <!-- ============================================
+    HEADER CORPORATIVO
+    ============================================ -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+            <div>
+                <h1>Control de Asistencias</h1>
+                <div class="subtitle"><i class="fas fa-chart-line"></i> Dashboard y Reportes</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Administrador</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Administrador</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn">
+                    <i class="fas fa-home"></i> Menú Principal
+                </button>
+                <button class="dropdown-item" id="perfilBtn">
+                    <i class="fas fa-user-cog"></i> Mi Perfil
+                </button>
+                <button class="dropdown-item logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================
+    CONTENIDO PRINCIPAL
+    ============================================ -->
+    <main class="main-container">
+        <!-- Barra de Acciones -->
+        <div class="actions-bar">
+            <h2>
+                <i class="fas fa-chart-pie"></i> Dashboard de <span>Asistencia</span>
+            </h2>
+            <div class="actions-group">
+                <!-- FILTROS UNIVERSALES -->
+                <div class="filter-item">
+                    <label><i class="fas fa-calendar-alt"></i> Mes:</label>
+                    <select id="filtroMes"></select>
+                </div>
+                <div class="filter-item">
+                    <label><i class="fas fa-calendar-alt"></i> Año:</label>
+                    <select id="filtroAnio"></select>
+                </div>
+
+                <button class="btn btn-pdf" id="btnExportarPDF">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+                <button class="btn btn-pdf" id="btnExportarPDFUsuario"
+                    style="background: #6f42c1; box-shadow: 0 3px 10px rgba(111, 66, 193, 0.25);">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF (Usuario)
+                </button>
+                <!--  <button class="btn btn-volver" id="btnVolver">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>-->
+            </div>
+        </div>
+
+        <!-- ============================================
+        SECCIÓN 1: KPIs del MES
+        ============================================ -->
+        <div class="kpi-section" id="kpiSectionMes">
+            <div class="kpi-section-title">
+                <i class="fas fa-calendar-alt"></i> Mes
+                <span class="kpi-section-subtitle" id="kpiMesSubtitle">Cargando...</span>
+            </div>
+            <div class="kpi-grid" id="kpiGridMes">
+                <div class="kpi-card kpi-users">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="kpi-value" id="kpiTotalUsuarios">0</div>
+                    <div class="kpi-label">Total Usuarios Activos</div>
+                </div>
+
+                <div class="kpi-card kpi-assignments">
+                    <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="kpi-value" id="kpiAsignacionesMes">0</div>
+                    <div class="kpi-label">Asignaciones del Mes</div>
+                </div>
+
+                <div class="kpi-card kpi-registered">
+                    <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="kpi-value" id="kpiMarcacionesMes">0</div>
+                    <div class="kpi-label">Marcaciones Registradas del Mes</div>
+                    <div class="kpi-sub">(Excluye faltas justificadas)</div>
+                </div>
+
+                <div class="kpi-card kpi-missing">
+                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-value" id="kpiFaltantesMes">0</div>
+                    <div class="kpi-label">Marcaciones Faltantes del Mes</div>
+                </div>
+
+                <div class="kpi-card kpi-late" style="border-top-color: #17a2b8;">
+                    <div class="kpi-icon" style="color: #17a2b8;"><i class="fas fa-file-alt"></i></div>
+                    <div class="kpi-value" id="kpiFaltasJustificadas">0</div>
+                    <div class="kpi-label">Faltas Justificadas del Mes</div>
+                </div>
+
+                <div class="kpi-card kpi-excess" style="border-top-color: #fd7e14;">
+                    <div class="kpi-icon" style="color: #fd7e14;"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="kpi-value" id="kpiFaltasNoJustificadas">0</div>
+                    <div class="kpi-label">Faltas No Justificadas del Mes</div>
+                </div>
+
+                <div class="kpi-card kpi-missing" style="border-top-color: #6f42c1;">
+                    <div class="kpi-icon" style="color: #6f42c1;"><i class="fas fa-calendar-times"></i></div>
+                    <div class="kpi-value" id="kpiDiasNoLaborables">0</div>
+                    <div class="kpi-label">Días No Laborables del Mes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================
+        SECCIÓN 2: KPIs de la SEMANA
+        ============================================ -->
+        <div class="kpi-section" id="kpiSectionSemana">
+            <div class="kpi-section-title">
+                <i class="fas fa-calendar-week"></i> Semana
+                <span class="kpi-section-subtitle" id="kpiSemanaSubtitle">Cargando...</span>
+            </div>
+            <div class="kpi-grid" id="kpiGridSemana">
+                <div class="kpi-card kpi-assignments">
+                    <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="kpi-value" id="kpiAsignacionesSemana">0</div>
+                    <div class="kpi-label">Asignaciones de la Semana</div>
+                </div>
+
+                <div class="kpi-card kpi-registered">
+                    <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="kpi-value" id="kpiMarcacionesSemana">0</div>
+                    <div class="kpi-label">Marcaciones Registradas de la Semana</div>
+                    <div class="kpi-sub">(Excluye faltas justificadas)</div>
+                </div>
+
+                <div class="kpi-card kpi-missing">
+                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-value" id="kpiFaltantesSemana">0</div>
+                    <div class="kpi-label">Marcaciones Faltantes de la Semana</div>
+                </div>
+
+                <div class="kpi-card kpi-late" style="border-top-color: #17a2b8;">
+                    <div class="kpi-icon" style="color: #17a2b8;"><i class="fas fa-file-alt"></i></div>
+                    <div class="kpi-value" id="kpiFaltasJustificadasSemana">0</div>
+                    <div class="kpi-label">Faltas Justificadas de la Semana</div>
+                </div>
+
+                <div class="kpi-card kpi-excess" style="border-top-color: #fd7e14;">
+                    <div class="kpi-icon" style="color: #fd7e14;"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="kpi-value" id="kpiFaltasNoJustificadasSemana">0</div>
+                    <div class="kpi-label">Faltas No Justificadas de la Semana</div>
+                </div>
+
+                <div class="kpi-card kpi-missing" style="border-top-color: #6f42c1;">
+                    <div class="kpi-icon" style="color: #6f42c1;"><i class="fas fa-calendar-times"></i></div>
+                    <div class="kpi-value" id="kpiDiasNoLaborablesSemana">0</div>
+                    <div class="kpi-label">Días No Laborables de la Semana</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================
+        SECCIÓN 3: KPIs del DÍA
+        ============================================ -->
+        <div class="kpi-section" id="kpiSectionDia">
+            <div class="kpi-section-title">
+                <i class="fas fa-sun"></i> Día de Hoy
+                <span class="kpi-section-subtitle" id="kpiDiaSubtitle">Cargando...</span>
+            </div>
+            <div class="kpi-grid" id="kpiGridHoy">
+                <div class="kpi-card kpi-assignments">
+                    <div class="kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="kpi-value" id="kpiAsignacionesHoy">0</div>
+                    <div class="kpi-label">Asignaciones de Hoy</div>
+                </div>
+
+                <div class="kpi-card kpi-registered">
+                    <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="kpi-value" id="kpiMarcacionesHoy">0</div>
+                    <div class="kpi-label">Marcaciones Registradas Hoy</div>
+                    <div class="kpi-sub">(Excluye faltas justificadas)</div>
+                </div>
+
+                <div class="kpi-card kpi-missing">
+                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-value" id="kpiFaltantesHoy">0</div>
+                    <div class="kpi-label">Marcaciones Faltantes Hoy</div>
+                </div>
+
+                <div class="kpi-card kpi-late">
+                    <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="kpi-value" id="kpiTardanza">0</div>
+                    <div class="kpi-label">Usuarios Llegaron Tarde</div>
+                </div>
+
+                <div class="kpi-card kpi-ontime">
+                    <div class="kpi-icon"><i class="fas fa-check"></i></div>
+                    <div class="kpi-value" id="kpiATiempo">0</div>
+                    <div class="kpi-label">Usuarios Llegaron a Tiempo</div>
+                </div>
+
+                <div class="kpi-card kpi-excess">
+                    <div class="kpi-icon"><i class="fas fa-utensils"></i></div>
+                    <div class="kpi-value" id="kpiExcesoAlmuerzo">0</div>
+                    <div class="kpi-label">Excedieron Tiempo de Almuerzo</div>
+                </div>
+
+                <div class="kpi-card kpi-ontime" style="border-top-color: #20c997;">
+                    <div class="kpi-icon" style="color: #20c997;"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-value" id="kpiCumplieronAlmuerzo">0</div>
+                    <div class="kpi-label">Cumplieron Tiempo de Almuerzo</div>
+                    <div class="kpi-sub">(Salida a tiempo)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================
+        GRÁFICOS (25 gráficos)
+        ============================================ -->
+        <div class="charts-grid" id="chartsGrid">
+            <!-- GRÁFICO 1: Barras - Rendimiento Semanal -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-bar"></i> Rendimiento Semanal</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico1">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="ingresoAlmuerzo">Ingreso Almuerzo</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico1"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 7: Rendimiento Mensual por Días -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-bar"></i> Rendimiento Mensual por Días</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico7">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="ingresoAlmuerzo">Ingreso Almuerzo</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                        <select id="filtroSemanaGrafico7"></select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico7"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 10: Rendimiento Mensual por Semanas -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-bar"></i> Rendimiento Mensual por Semanas</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico10">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="ingresoAlmuerzo">Ingreso Almuerzo</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico10"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 13: Justificación Semanal Tardanza/Exceso -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-gavel"></i> Justificación Semanal de Tardanza/Exceso</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico13">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico13"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 14: Justificación Mensual por Días -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-gavel"></i> Justificación Mensual de Tardanza/Exceso por Días</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico14">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                        <select id="filtroSemanaGrafico14">
+                            <option value="1">Semana 1</option>
+                            <option value="2">Semana 2</option>
+                            <option value="3">Semana 3</option>
+                            <option value="4">Semana 4</option>
+                            <option value="5">Semana 5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico14"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 15: Justificación Mensual por Semanas -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-gavel"></i> Justificación Mensual de Tardanza/Exceso por Semanas</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico15">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico15"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 2: Circular - Semanal por Usuario -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-pie"></i> Rendimiento Semanal por Usuario</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico2"><option value="">Seleccionar Usuario</option></select>
+                        <select id="filtroMomentoGrafico2">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="ingresoAlmuerzo">Ingreso Almuerzo</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico2"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 3: Circular - Mensual por Usuario -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-pie"></i> Rendimiento Mensual por Usuario</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico3"><option value="">Seleccionar Usuario</option></select>
+                        <select id="filtroMomentoGrafico3">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="ingresoAlmuerzo">Ingreso Almuerzo</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico3"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 16: Justificación Semanal por Usuario -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-gavel"></i> Justificación Semanal Tardanza/Exceso por Usuario</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico16"><option value="">Seleccionar Usuario</option></select>
+                        <select id="filtroMomentoGrafico16">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico16"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 17: Justificación Mensual por Usuario -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-gavel"></i> Justificación Mensual Tardanza/Exceso por Usuario</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico17"><option value="">Seleccionar Usuario</option></select>
+                        <select id="filtroMomentoGrafico17">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico17"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 21: Faltas Semanal por Usuario -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-user-slash"></i> Faltas Semanal por Usuario</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico21"><option value="">Seleccionar Usuario</option></select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico21"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 22: Faltas Mensual por Usuario -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-user-slash"></i> Faltas Mensual por Usuario</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico22"><option value="">Seleccionar Usuario</option></select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico22"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 4: Evolución Tardanza por Días -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución Tardanza por Días</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico4"><option value="">Seleccionar Usuario</option></select>
+                        <select id="filtroSemanaGrafico4">
+                            <option value="1">Semana 1</option>
+                            <option value="2">Semana 2</option>
+                            <option value="3">Semana 3</option>
+                            <option value="4">Semana 4</option>
+                            <option value="5">Semana 5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico4"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 11: Evolución Tardanza por Semanas -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución Tardanza por Semanas</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico11"><option value="">Seleccionar Usuario</option></select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico11"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 5: Evolución Exceso por Días -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución Exceso (Almuerzo) por Días</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico5"><option value="">Seleccionar Usuario</option></select>
+                        <select id="filtroSemanaGrafico5">
+                            <option value="1">Semana 1</option>
+                            <option value="2">Semana 2</option>
+                            <option value="3">Semana 3</option>
+                            <option value="4">Semana 4</option>
+                            <option value="5">Semana 5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico5"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 12: Evolución Exceso por Semanas -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-chart-line"></i> Evolución Exceso (Almuerzo) por Semanas</div>
+                    <div class="chart-filters">
+                        <select id="filtroUsuarioGrafico12"><option value="">Seleccionar Usuario</option></select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico12"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 18: Justificación de Faltas Semanal -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-user-slash"></i> Justificación Semanal de Faltas</div>
+                </div>
+                <div class="chart-container"><canvas id="grafico18"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 19: Justificación de Faltas por Días -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-user-slash"></i> Justificación Mensual de Faltas por Días</div>
+                    <div class="chart-filters">
+                        <select id="filtroSemanaGrafico19">
+                            <option value="1">Semana 1</option>
+                            <option value="2">Semana 2</option>
+                            <option value="3">Semana 3</option>
+                            <option value="4">Semana 4</option>
+                            <option value="5">Semana 5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="grafico19"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 20: Justificación de Faltas por Semanas -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-user-slash"></i> Justificación Mensual de Faltas por Semanas</div>
+                </div>
+                <div class="chart-container"><canvas id="grafico20"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 6: Ranking del Día -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Ranking de Tardanzas / Excesos del Día</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico6">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                        <select id="filtroSucursalGrafico6"><option value="">Todas las Sucursales</option></select>
+                        <select id="filtroAreaGrafico6"><option value="">Todas las Áreas</option></select>
+                    </div>
+                </div>
+                <div class="chart-container-large"><canvas id="grafico6"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 8: Ranking Semanal -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Ranking de Tardanzas / Excesos de la Semana</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico8">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                        <select id="filtroSucursalGrafico8"><option value="">Todas las Sucursales</option></select>
+                        <select id="filtroAreaGrafico8"><option value="">Todas las Áreas</option></select>
+                    </div>
+                </div>
+                <div class="chart-container-large"><canvas id="grafico8"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 9: Ranking Mensual -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Ranking de Tardanzas / Excesos del Mes</div>
+                    <div class="chart-filters">
+                        <select id="filtroMomentoGrafico9">
+                            <option value="ingreso">Ingreso</option>
+                            <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                        </select>
+                        <select id="filtroSucursalGrafico9"><option value="">Todas las Sucursales</option></select>
+                        <select id="filtroAreaGrafico9"><option value="">Todas las Áreas</option></select>
+                    </div>
+                </div>
+                <div class="chart-container-large"><canvas id="grafico9"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 23: Ranking Faltas del Día -->
+          <!--  <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Ranking de Faltas del Día</div>
+                    <div class="chart-filters">
+                        <select id="filtroSucursalGrafico23"><option value="">Todas las Sucursales</option></select>
+                        <select id="filtroAreaGrafico23"><option value="">Todas las Áreas</option></select>
+                    </div>
+                </div>
+                <div class="chart-container-large"><canvas id="grafico23"></canvas></div>
+            </div>-->
+
+            <!-- GRÁFICO 24: Ranking Faltas de la Semana -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Ranking de Faltas de la Semana</div>
+                    <div class="chart-filters">
+                        <select id="filtroSucursalGrafico24"><option value="">Todas las Sucursales</option></select>
+                        <select id="filtroAreaGrafico24"><option value="">Todas las Áreas</option></select>
+                    </div>
+                </div>
+                <div class="chart-container-large"><canvas id="grafico24"></canvas></div>
+            </div>
+
+            <!-- GRÁFICO 25: Ranking Faltas del Mes -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-title"><i class="fas fa-trophy"></i> Ranking de Faltas del Mes</div>
+                    <div class="chart-filters">
+                        <select id="filtroSucursalGrafico25"><option value="">Todas las Sucursales</option></select>
+                        <select id="filtroAreaGrafico25"><option value="">Todas las Áreas</option></select>
+                    </div>
+                </div>
+                <div class="chart-container-large"><canvas id="grafico25"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ============================================
+        TABLA DE RESUMEN MENSUAL
+        ============================================ -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-list-ul"></i> Resumen Mensual de Marcaciones</h3>
+                <span style="font-size: 13px; color: #6c757d;">
+                    <i class="fas fa-info-circle"></i> Mostrando según el Mes Seleccionado
+                </span>
+            </div>
+            <div class="table-wrapper">
+                <table id="tablaResumen">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user"></i> Usuario</th>
+                            <th><i class="fas fa-calendar"></i> Fecha</th>
+                            <th><i class="fas fa-clock"></i> Hora Ingreso</th>
+                            <th><i class="fas fa-check-circle"></i> Estado</th>
+                            <th><i class="fas fa-utensils"></i> Almuerzo Ingreso</th>
+                            <th><i class="fas fa-check-circle"></i> Estado</th>
+                            <th><i class="fas fa-utensils"></i> Almuerzo Salida</th>
+                            <th><i class="fas fa-check-circle"></i> Estado</th>
+                            <th><i class="fas fa-exclamation-triangle"></i> Falta / Día No Laborable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaResumenBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div id="paginacionContainer" class="paginacion-container" style="display: none;">
+            <div class="paginacion-info">
+                <i class="fas fa-list-ul"></i>
+                Mostrando <span id="inicioRegistro">0</span> - <span id="finRegistro">0</span>
+                de <span id="totalRegistros">0</span> registros
+            </div>
+            <div class="paginacion-buttons">
+                <button class="btn-paginacion" id="btnPrimeraPagina" disabled>
+                    <i class="fas fa-angle-double-left"></i> Primera
+                </button>
+                <button class="btn-paginacion" id="btnPaginaAnterior" disabled>
+                    <i class="fas fa-angle-left"></i> Anterior
+                </button>
+                <span class="paginacion-pagina" id="paginaActualInfo">Página 1 de 1</span>
+                <button class="btn-paginacion" id="btnPaginaSiguiente" disabled>
+                    Siguiente <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="btn-paginacion" id="btnUltimaPagina" disabled>
+                    Última <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============================================
+    MESSAGE BOX
+    ============================================ -->
+    <div id="messageBox" class="message-box">
+        <i class="fas fa-info-circle"></i>
+        <span id="messageText">Mensaje</span>
+    </div>
+
+    <!-- ============================================
+    MODAL DE CARGA GLOBAL
+    ============================================ -->
+    <div id="loadingModal" class="loading-modal-overlay">
+        <div class="loading-modal-content">
+            <div class="loading-modal-spinner">
+                <i class="fas fa-spinner"></i>
+            </div>
+            <div class="loading-modal-title" id="loadingModalTitle">Cargando Datos</div>
+            <div class="loading-modal-subtitle" id="loadingModalSubtitle">Por favor espere...</div>
+            <div class="loading-modal-progress">
+                <div class="loading-modal-progress-bar" id="loadingModalProgress"></div>
+            </div>
+            <div class="loading-modal-status" id="loadingModalStatus">Iniciando...</div>
+            <div class="loading-modal-tip" id="loadingModalTip">💡 Los datos se cargan desde el servidor</div>
+        </div>
+    </div>
+
+    <!-- ============================================
+    MODAL DE BLOQUEO (ERROR DE SERVIDORES)
+    ============================================ -->
+    <div id="blockingModal" class="blocking-modal-overlay">
+        <div class="blocking-modal-content">
+            <div class="blocking-modal-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="blocking-modal-title">⚠️ Servidores No Disponibles</div>
+            <div class="blocking-modal-subtitle" id="blockingSubtitle">
+                No se pudo establecer conexión con los servidores de datos.
+            </div>
+            <div class="blocking-modal-message">
+                <div style="margin-top: 10px; font-size: 13px; color: #6c757d;">
+                    ⚡ Si persiste, comuníquese con el administrador.
+                </div>
+            </div>
+            <div class="blocking-modal-buttons">
+                <button class="btn btn-recargar" id="btnRecargarPagina">
+                    <i class="fas fa-sync-alt"></i> Recargar Página
+                </button>
+                <button class="btn btn-menu" id="btnIrMenu">
+                    <i class="fas fa-home"></i> Ir al Menú
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+    MODAL DE CONFIGURACIÓN - EXPORTAR PDF POR USUARIO
+    ============================================ -->
+    <div id="configModal" class="config-modal-overlay">
+        <div class="config-modal-content">
+            <button class="config-modal-close" id="configModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="config-modal-title">
+                <i class="fas fa-file-pdf"></i> Exportar PDF por Usuario
+            </div>
+            <div class="config-modal-subtitle">
+                Configure los parámetros para generar el reporte personalizado.
+            </div>
+
+            <form id="configForm" onsubmit="return false;" novalidate>
+                <div class="config-form-group">
+                    <label><i class="fas fa-user"></i> Usuario</label>
+                    <select id="configUsuario" required>
+                        <option value="all">✅ Todos los Usuarios</option>
+                    </select>
+                </div>
+
+                <div class="config-form-group">
+                    <label><i class="fas fa-clock"></i> Momento</label>
+                    <select id="configMomento" required>
+                        <option value="ingreso">Ingreso</option>
+                        <option value="ingresoAlmuerzo">Ingreso Almuerzo</option>
+                        <option value="salidaAlmuerzo">Salida Almuerzo</option>
+                    </select>
+                </div>
+
+                <div class="config-form-group">
+                    <label><i class="fas fa-calendar-week"></i> Semana</label>
+                    <select id="configSemana" required>
+                        <option value="1">Semana 1</option>
+                        <option value="2">Semana 2</option>
+                        <option value="3">Semana 3</option>
+                        <option value="4">Semana 4</option>
+                        <option value="5">Semana 5</option>
+                    </select>
+                </div>
+
+                <div class="config-modal-actions">
+                    <button type="button" class="btn btn-cancelar" id="configBtnCancelar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-exportar" id="configBtnExportar">
+                        <i class="fas fa-file-pdf"></i> Exportar PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================
+    SCRIPTS — orden correcto + defer
+    ============================================ -->
+
+    <!-- 1) Utilidades -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+
+    <!-- 2) Services -->
+    <script defer src="../services/Dashboard_Services.js"></script>
+
+    <!-- 3) Controllers (orden: sub-controladores ANTES del principal) -->
+    <script defer src="../controllers/Dashboard_KPIs_Controller.js"></script>
+    <script defer src="../controllers/Dashboard_Charts_Controller.js"></script>
+    <script defer src="../controllers/Dashboard_Resumen_Controller.js"></script>
+    <script defer src="../controllers/Dashboard_Controller.js"></script>
+
+    <!-- 4) Bootstrap -->
+    <script defer src="../../public/bootstrap/Dashboard_Bootstrap.js"></script>
+
+    <!-- 5) Bloqueo (opcional) -->
+    <!--<script defer src="../../public/utils/Bloqueo.js"></script>-->
+</body>
+
+</html>

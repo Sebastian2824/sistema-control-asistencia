@@ -1,0 +1,43 @@
+# ================================
+# Dependencias
+# ================================
+Frontend/.env
+Frontend/node_modules
+Bancked/
+
+# ================================
+# Logs
+# ================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ================================
+# Archivos del sistema operativo
+# ================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ================================
+# Configuración de editores
+# ================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ================================
+# Build / cache
+# ================================
+dist/
+build/
+.cache/
+coverage/
+
+# ================================
+# Railway
+# ================================
+.railway/

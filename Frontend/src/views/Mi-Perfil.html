@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Control de Asistencias</title>
+    <link rel="icon" type="image/png" href="../../public/assets/icono.png">
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="../css/Perfil.css">
+</head>
+
+<body>
+    <!-- HEADER CORPORATIVO -->
+    <header class="header">
+        <div class="logo-area" id="logoArea">
+            <div class="logo-icon">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <div>
+                <h1>Control de Asistencias</h1>
+                <div class="subtitle"><i class="fas fa-user-circle"></i> Mi Perfil</div>
+            </div>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar">
+                <span class="avatar-icon"><i class="fas fa-user"></i></span>
+                <div class="user-info">
+                    <div class="user-name" id="displayUserName">Cargando...</div>
+                    <div class="user-role" id="displayUserRole"><i class="fas fa-briefcase"></i> Empleado</div>
+                </div>
+                <span class="dropdown-icon"><i class="fas fa-chevron-down"></i></span>
+            </div>
+
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <div class="dropdown-avatar"><i class="fas fa-user"></i></div>
+                    <div class="dropdown-user-info">
+                        <h4 id="dropdownUserName">Cargando...</h4>
+                        <p><i class="fas fa-envelope"></i> <span id="dropdownUserEmail">cargando@email.com</span></p>
+                        <span class="user-role-badge" id="dropdownUserRole">Empleado</span>
+                    </div>
+                </div>
+                <button class="dropdown-item" id="menuBtn">
+                    <i class="fas fa-home"></i> Menú Principal
+                </button>
+                <button class="dropdown-item logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MODAL: CARGA -->
+    <div id="modalCargaPerfil" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-spinner fa-spin"></i> Cargando Perfil...</h3>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <i class="fas fa-user-circle fa-spin"></i>
+                </div>
+                <div id="cargaPerfilMensaje">Cargando datos del perfil...</div>
+                <div class="progreso-container">
+                    <div id="cargaPerfilProgreso" class="progreso-bar"></div>
+                </div>
+                <div id="cargaPerfilDetalle">Por favor espere...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2>Mi Perfil</h2>
+                <p>Actualice sus datos personales de forma segura</p>
+                <span class="profile-badge"><i class="fas fa-shield-alt"></i> Datos protegidos</span>
+            </div>
+
+            <!-- Información de la Empresa (solo lectura) -->
+            <div class="profile-company">
+                <div class="company-grid">
+                    <div class="company-item">
+                        <div class="company-icon"><i class="fas fa-store"></i></div>
+                        <div class="company-info">
+                            <span class="company-label">Sucursal</span>
+                            <span class="company-value" id="infoSucursal">Cargando...</span>
+                        </div>
+                    </div>
+                    <div class="company-item">
+                        <div class="company-icon"><i class="fas fa-folder"></i></div>
+                        <div class="company-info">
+                            <span class="company-label">Área</span>
+                            <span class="company-value" id="infoArea">Cargando...</span>
+                        </div>
+                    </div>
+                    <div class="company-item">
+                        <div class="company-icon"><i class="fas fa-id-badge"></i></div>
+                        <div class="company-info">
+                            <span class="company-label">Rol</span>
+                            <span class="company-value" id="infoRol">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-body">
+                <!-- Alerta de cambios no guardados -->
+                <div id="unsavedAlert" class="unsaved-alert">
+                    <span><i class="fas fa-exclamation-triangle"></i> Tiene cambios sin guardar</span>
+                    <button id="discardChangesBtn"><i class="fas fa-times"></i> Descartar</button>
+                </div>
+
+                <form id="perfilForm" action="javascript:void(0);" onsubmit="return false;" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombres"><i class="fas fa-user"></i> Nombres</label>
+                            <input type="text" id="nombres" required placeholder="Ingrese sus nombres">
+                        </div>
+                        <div class="form-group">
+                            <label for="apellidos"><i class="fas fa-user-friends"></i> Apellidos</label>
+                            <input type="text" id="apellidos" required placeholder="Ingrese sus apellidos">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombreUsuario"><i class="fas fa-at"></i> Nombre de Usuario</label>
+                        <input type="text" id="nombreUsuario" readonly disabled>
+                        <div class="help-text">
+                            <i class="fas fa-lock"></i> El nombre de usuario no se puede modificar
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="correo"><i class="fas fa-envelope"></i> Correo Corporativo</label>
+                        <input type="email" id="correo" readonly disabled>
+                        <div class="help-text">
+                            <i class="fas fa-lock"></i> El correo corporativo no se puede modificar
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emailPersonal"><i class="fas fa-envelope-open"></i> Email Personal</label>
+                        <input type="email" id="emailPersonal" placeholder="ejemplo@gmail.com">
+                        <div class="help-text">
+                            <i class="fas fa-info-circle"></i> Correo electrónico personal
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefonoCorporativo"><i class="fas fa-phone"></i> Teléfono Corporativo</label>
+                            <input type="number" id="telefonoCorporativo" placeholder="Ej: 987654321" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefonoPersonal"><i class="fas fa-mobile-alt"></i> Teléfono Personal</label>
+                            <input type="number" id="telefonoPersonal" placeholder="Ej: 987654321" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccionGeneral"><i class="fas fa-map-marked-alt"></i> Dirección General</label>
+                        <input type="text" id="direccionGeneral" placeholder="Ej: Lima, Perú">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccionEspecifica"><i class="fas fa-home"></i> Dirección Específica</label>
+                        <input type="text" id="direccionEspecifica" placeholder="Calle, número, urbanización, etc.">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rol"><i class="fas fa-id-badge"></i> Rol</label>
+                            <input type="text" id="rol" readonly disabled>
+                            <div class="help-text">
+                                <i class="fas fa-lock"></i> El rol no se puede modificar
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sucursal"><i class="fas fa-store"></i> Sucursal</label>
+                            <input type="text" id="sucursal" readonly disabled>
+                            <div class="help-text">
+                                <i class="fas fa-lock"></i> La sucursal no se puede modificar
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area"><i class="fas fa-folder"></i> Área</label>
+                        <input type="text" id="area" readonly disabled>
+                        <div class="help-text">
+                            <i class="fas fa-lock"></i> El área no se puede modificar
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nuevaContraseña"><i class="fas fa-lock"></i> Nueva Contraseña</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="nuevaContraseña"
+                                    placeholder="Dejar en blanco para mantener la actual" autocomplete="new-password">
+                                <button type="button" class="toggle-password" data-toggle-password="nuevaContraseña"
+                                    aria-label="Mostrar contraseña">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i> Mínimo 6 caracteres
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmarContraseña"><i class="fas fa-check-circle"></i> Confirmar
+                                Contraseña</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="confirmarContraseña" placeholder="Repita la nueva contraseña"
+                                    autocomplete="new-password">
+                                <button type="button" class="toggle-password" data-toggle-password="confirmarContraseña"
+                                    aria-label="Mostrar contraseña">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" id="cancelarBtn">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="button" class="btn btn-primary" id="guardarBtn" disabled>
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============================================
+         SCRIPTS — orden correcto + defer
+         ============================================ -->
+    <script defer src="../../public/config/config.js"></script>
+    <script defer src="../../public/utils/Environment_Detector.js"></script>
+    <script defer src="../../public/utils/Api_Client.js"></script>
+
+    <script defer src="../services/Auth_Services.js"></script>
+    <script defer src="../services/Perfil_Services.js"></script>
+
+    <script defer src="../controllers/Perfil_Controller.js"></script>
+
+    <script defer src="../../public/bootstrap/Perfil_Bootstrap.js"></script>
+
+    <script defer src="../../public/utils/Bloqueo.js"></script>
+</body>
+
+</html>
