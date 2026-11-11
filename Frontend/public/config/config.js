@@ -2,60 +2,49 @@
 // CONFIGURACIÓN GLOBAL DEL SISTEMA - CONTROL DE ASISTENCIA
 // ==============================================
 
- const _getBaseURL = () => {
-        // Si estamos en GitHub Pages con subcarpeta, la URL será:
-        // https://usuario.github.io/repo/
-        // Si estamos en local, será:
-        // http://localhost:5500/  o  file:///...
+const _getBaseURL = () => {
+    const path = window.location.pathname;
+    const parts = path.split('/').filter(Boolean);
 
-        const path = window.location.pathname;
-
-        // Encontrar la subcarpeta del proyecto (para GitHub Pages)
-        // Ej: /sistema-control-asistencia/Frontend/src/views/Menu.html
-        // Queremos: /sistema-control-asistencia/
-        const parts = path.split('/').filter(Boolean);
-
-        // Si el primer segmento es el nombre del repo (sistema-control-asistencia),
-        // lo usamos como base. Si no, base es raíz.
-        if (parts.length > 0 && !parts[0].includes('.')) {
-            // Es probable que sea el nombre del repo en GitHub Pages
-            // Pero cuidado: en local con Live Server, parts[0] podría ser "Frontend"
-            const esGitHubPages = window.location.hostname.includes('github.io');
-            if (esGitHubPages) {
-                return `/${parts[0]}/`;
-            }
+    if (parts.length > 0 && !parts[0].includes('.')) {
+        const esGitHubPages = window.location.hostname.includes('github.io');
+        if (esGitHubPages) {
+            return `/${parts[0]}/`;
         }
+    }
+    return '/';
+};
 
-        return '/';
-    };
+// 2) BASE_URL calculado una sola vez
+const BASE_URL = _getBaseURL();
 
+// 3) ROUTES con BASE_URL + ruta
 const CONFIG = {
+    BASE_URL: BASE_URL,
 
     BACKEND_URL: (() => {
         const isLocalhost = window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1' ||
-            window.location.hostname.startsWith('192.168.');
+                            window.location.hostname === '127.0.0.1' ||
+                            window.location.hostname.startsWith('192.168.');
         return isLocalhost
             ? 'http://localhost:3001'
             : 'https://bancked-control-asistencia-production.up.railway.app';
     })(),
 
-    BASE_URL: _getBaseURL(),
-
     // Rutas del sistema
     ROUTES: {
-        LOGIN: 'index.html',
-        MENULOGIN: 'Frontend/src/views/Menu.html',
-        MENU: 'Menu.html',
-        REGISTRO_ASISTENCIA: 'Registro-Asistencia.html',
-        GESTION_USUARIOS: 'Gestion-Usuarios.html',
-        GESTION_ASIGNACION: 'Gestion-Asignaciones.html',
-        GESTION_HORARIOS: 'Gestion-Horarios.html',
-        GESTION_MARCACIONES: 'Gestion-Marcaciones.html',
-        GESTION_ESTADOS: 'Dashboard-Asistencia.html',
-        REPORTES: 'Reportes.html',
-        MARCACIONES: 'Historial-Marcaciones.html',
-        PERFIL: 'Mi-Perfil.html'
+        LOGIN:              BASE_URL + 'index.html',
+        MENULOGIN:          BASE_URL + 'Frontend/src/views/Menu.html',
+        MENU:               BASE_URL + 'Frontend/src/views/Menu.html',
+        REGISTRO_ASISTENCIA:BASE_URL + 'Frontend/src/views/Registro-Asistencia.html',
+        GESTION_USUARIOS:   BASE_URL + 'Frontend/src/views/Gestion-Usuarios.html',
+        GESTION_ASIGNACION: BASE_URL + 'Frontend/src/views/Gestion-Asignaciones.html',
+        GESTION_HORARIOS:   BASE_URL + 'Frontend/src/views/Gestion-Horarios.html',
+        GESTION_MARCACIONES:BASE_URL + 'Frontend/src/views/Gestion-Marcaciones.html',
+        GESTION_ESTADOS:    BASE_URL + 'Frontend/src/views/Dashboard-Asistencia.html',
+        REPORTES:           BASE_URL + 'Frontend/src/views/Reportes.html',
+        MARCACIONES:        BASE_URL + 'Frontend/src/views/Historial-Marcaciones.html',
+        PERFIL:             BASE_URL + 'Frontend/src/views/Mi-Perfil.html'
     },
 
     SINCRONIZACION: {
