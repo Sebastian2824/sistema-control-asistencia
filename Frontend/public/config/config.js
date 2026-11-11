@@ -10,7 +10,7 @@ const CONFIG = {
                             window.location.hostname.startsWith('192.168.');
         return isLocalhost 
             ? 'http://localhost:3001' 
-            : 'https://api-controlhorario.grupoperuroutes.com';
+            : 'https://bancked-control-asistencia-production.up.railway.app';
     })(),
     
     // Rutas del sistema
